@@ -110,7 +110,7 @@ pixi run start
 
 Run any of the included examples using Pixi tasks:
 
-| Example | Command | Description |
+| Example / Task | Command | Description |
 | :--- | :--- | :--- |
 | **Logo Generator** | `pixi run example-logo` | Generates the official raylib-mojo brand logo |
 | **Basic Window** | `pixi run example-window` | Basic window creation and text rendering |
@@ -118,6 +118,24 @@ Run any of the included examples using Pixi tasks:
 | **2D Collision** | `pixi run example-collision` | Mouse collision detection with rectangles & circles |
 | **2D Camera** | `pixi run example-camera-2d` | 2D Camera panning, target tracking & mouse zoom |
 | **3D Shapes** | `pixi run example-3d` | 3D rendering with Camera3D, 3D shapes & grid |
+| **Audio Stream** | `pixi run example-audio-stream` | Real-time audio waveform synthesis and stream playback |
+| **Sprite Animation** | `pixi run example-sprite-anim` | 2D sprite sheet animation, frame clipping & speed control |
+| **Particle Assembly** | `pixi run example-particle-assembly` | Interactive 2D physics simulation with 1,200 particles & mouse forces |
+| **Game of Life** | `pixi run example-game-of-life` | Conway's Game of Life cellular automata simulation |
+
+## Development & Automatic Binding Generation
+
+`raylib-mojo` includes a pure Mojo automatic binding generator script (`scripts/generate_bindings.mojo`) that parses Raylib's C declarations from `raylib.h`, maps C types to Mojo types, and verifies each symbol dynamically against `libraylib.so`.
+
+To regenerate the low-level C FFI wrappers into `src/raylib/c.mojo`:
+
+```bash
+# Build libraylib.so first if not built already
+pixi run build-raylib
+
+# Regenerate bindings
+pixi run generate-bindings
+```
 
 ## Contributing
 
@@ -128,4 +146,4 @@ If you want to request features or report bugs related to raylib directly (in co
 
 ## License
 
-See [LICENSE](LICENSE) for details.
+See [LICENSE](LICENSE.md) for details.

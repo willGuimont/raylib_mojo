@@ -1,7 +1,6 @@
 """Raylib primitive types and C-compatible structs."""
 
-from std.ffi import c_int, c_uint, c_float, c_char, c_void
-from std.memory import Pointer
+from std.ffi import c_int, c_uint, c_float, c_char
 
 # ===-----------------------------------------------------------------------===#
 # Vector2
@@ -11,16 +10,8 @@ from std.memory import Pointer
 struct Vector2(ImplicitlyCopyable, TrivialRegisterPassable):
     """Vector2 type (2 float components)."""
 
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
-
     var x: Float32
     var y: Float32
-
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
 
     def __init__(out self, x: Float32 = 0.0, y: Float32 = 0.0):
         self.x = x
@@ -38,17 +29,9 @@ struct Vector2(ImplicitlyCopyable, TrivialRegisterPassable):
 struct Vector3(ImplicitlyCopyable, TrivialRegisterPassable):
     """Vector3 type (3 float components)."""
 
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
-
     var x: Float32
     var y: Float32
     var z: Float32
-
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
 
     def __init__(
         out self,
@@ -72,18 +55,10 @@ struct Vector3(ImplicitlyCopyable, TrivialRegisterPassable):
 struct Vector4(ImplicitlyCopyable, TrivialRegisterPassable):
     """Vector4 type (4 float components)."""
 
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
-
     var x: Float32
     var y: Float32
     var z: Float32
     var w: Float32
-
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
 
     def __init__(
         out self,
@@ -109,18 +84,10 @@ struct Vector4(ImplicitlyCopyable, TrivialRegisterPassable):
 struct Quaternion(ImplicitlyCopyable, TrivialRegisterPassable):
     """Quaternion type (4 float components)."""
 
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
-
     var x: Float32
     var y: Float32
     var z: Float32
     var w: Float32
-
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
 
     def __init__(
         out self,
@@ -143,12 +110,8 @@ struct Quaternion(ImplicitlyCopyable, TrivialRegisterPassable):
 # ===-----------------------------------------------------------------------===#
 
 
-struct Matrix(ImplicitlyCopyable):
+struct Matrix(ImplicitlyCopyable, TrivialRegisterPassable):
     """Matrix 4x4 type (column-major layout)."""
-
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
 
     var m0: Float32
     var m4: Float32
@@ -166,10 +129,6 @@ struct Matrix(ImplicitlyCopyable):
     var m7: Float32
     var m11: Float32
     var m15: Float32
-
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
 
     def __init__(out self):
         self.m0 = 1.0
@@ -190,6 +149,7 @@ struct Matrix(ImplicitlyCopyable):
         self.m15 = 1.0
 
     def __copyinit__(out self: Self, existing: Self):
+        self = Self()
         self.m0 = existing.m0
         self.m4 = existing.m4
         self.m8 = existing.m8
@@ -216,18 +176,10 @@ struct Matrix(ImplicitlyCopyable):
 struct Color(ImplicitlyCopyable, TrivialRegisterPassable):
     """Color RGBA type (4 unsigned byte components)."""
 
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
-
     var r: UInt8
     var g: UInt8
     var b: UInt8
     var a: UInt8
-
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
 
     def __init__(
         out self, r: UInt8 = 0, g: UInt8 = 0, b: UInt8 = 0, a: UInt8 = 255
@@ -249,18 +201,10 @@ struct Color(ImplicitlyCopyable, TrivialRegisterPassable):
 struct Rectangle(ImplicitlyCopyable, TrivialRegisterPassable):
     """Rectangle type (position and size)."""
 
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
-
     var x: Float32
     var y: Float32
     var width: Float32
     var height: Float32
-
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
 
     def __init__(
         out self,
@@ -283,29 +227,29 @@ struct Rectangle(ImplicitlyCopyable, TrivialRegisterPassable):
 # ===-----------------------------------------------------------------------===#
 
 
-struct Image:
+struct Image(ImplicitlyCopyable, TrivialRegisterPassable):
     """Image data type (RAM pixel data)."""
 
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
-
-    var data: Pointer[c_void, origin=_]
+    var data: Int
     var width: Int32
     var height: Int32
     var mipmaps: Int32
     var format: Int32
 
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
-
     def __init__(out self):
-        self.data = Pointer[c_void, origin=_]()
+        self.data = 0
         self.width = 0
         self.height = 0
         self.mipmaps = 0
         self.format = 0
+
+    def __copyinit__(out self: Self, existing: Self):
+        self = Self()
+        self.data = existing.data
+        self.width = existing.width
+        self.height = existing.height
+        self.mipmaps = existing.mipmaps
+        self.format = existing.format
 
 
 # ===-----------------------------------------------------------------------===#
@@ -313,22 +257,14 @@ struct Image:
 # ===-----------------------------------------------------------------------===#
 
 
-struct Texture:
+struct Texture(ImplicitlyCopyable, TrivialRegisterPassable):
     """Texture2D data type (VRAM GPU texture)."""
-
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
 
     var id: UInt32
     var width: Int32
     var height: Int32
     var mipmaps: Int32
     var format: Int32
-
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
 
     def __init__(out self):
         self.id = 0
@@ -337,31 +273,37 @@ struct Texture:
         self.mipmaps = 0
         self.format = 0
 
+    def __copyinit__(out self: Self, existing: Self):
+        self = Self()
+        self.id = existing.id
+        self.width = existing.width
+        self.height = existing.height
+        self.mipmaps = existing.mipmaps
+        self.format = existing.format
+
 
 # ===-----------------------------------------------------------------------===#
 # RenderTexture
 # ===-----------------------------------------------------------------------===#
 
 
-struct RenderTexture:
+struct RenderTexture(ImplicitlyCopyable, TrivialRegisterPassable):
     """RenderTexture2D type (render target for 2D/3D)."""
-
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
 
     var id: UInt32
     var texture: Texture
     var depth: Texture
 
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
-
     def __init__(out self):
         self.id = 0
         self.texture = Texture()
         self.depth = Texture()
+
+    def __copyinit__(out self: Self, existing: Self):
+        self = Self()
+        self.id = existing.id
+        self.texture = existing.texture
+        self.depth = existing.depth
 
 
 # ===-----------------------------------------------------------------------===#
@@ -369,12 +311,8 @@ struct RenderTexture:
 # ===-----------------------------------------------------------------------===#
 
 
-struct NPatchInfo:
+struct NPatchInfo(ImplicitlyCopyable, TrivialRegisterPassable):
     """NPatchInfo type (9-patch information)."""
-
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
 
     var source: Rectangle
     var left: Int32
@@ -382,10 +320,6 @@ struct NPatchInfo:
     var right: Int32
     var bottom: Int32
     var layout: Int32
-
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
 
     def __init__(out self):
         self.source = Rectangle()
@@ -395,28 +329,29 @@ struct NPatchInfo:
         self.bottom = 0
         self.layout = 0
 
+    def __copyinit__(out self: Self, existing: Self):
+        self = Self()
+        self.source = existing.source
+        self.left = existing.left
+        self.top = existing.top
+        self.right = existing.right
+        self.bottom = existing.bottom
+        self.layout = existing.layout
+
 
 # ===-----------------------------------------------------------------------===#
 # GlyphInfo
 # ===-----------------------------------------------------------------------===#
 
 
-struct GlyphInfo:
+struct GlyphInfo(ImplicitlyCopyable, TrivialRegisterPassable):
     """Font glyph info type."""
-
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
 
     var value: Int32
     var offsetX: Int32
     var offsetY: Int32
     var advanceX: Int32
     var image: Image
-
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
 
     def __init__(out self):
         self.value = 0
@@ -425,37 +360,46 @@ struct GlyphInfo:
         self.advanceX = 0
         self.image = Image()
 
+    def __copyinit__(out self: Self, existing: Self):
+        self = Self()
+        self.value = existing.value
+        self.offsetX = existing.offsetX
+        self.offsetY = existing.offsetY
+        self.advanceX = existing.advanceX
+        self.image = existing.image
+
 
 # ===-----------------------------------------------------------------------===#
 # Font
 # ===-----------------------------------------------------------------------===#
 
 
-struct Font:
+struct Font(ImplicitlyCopyable, TrivialRegisterPassable):
     """Font data type (includes texture and glyphs)."""
-
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
 
     var baseSize: Int32
     var glyphCount: Int32
     var glyphPadding: Int32
     var texture: Texture
-    var recs: Pointer[Rectangle, origin=_]
-    var glyphs: Pointer[GlyphInfo, origin=_]
-
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
+    var recs: Int
+    var glyphs: Int
 
     def __init__(out self):
         self.baseSize = 0
         self.glyphCount = 0
         self.glyphPadding = 0
         self.texture = Texture()
-        self.recs = Pointer[Rectangle, origin=_]()
-        self.glyphs = Pointer[GlyphInfo, origin=_]()
+        self.recs = 0
+        self.glyphs = 0
+
+    def __copyinit__(out self: Self, existing: Self):
+        self = Self()
+        self.baseSize = existing.baseSize
+        self.glyphCount = existing.glyphCount
+        self.glyphPadding = existing.glyphPadding
+        self.texture = existing.texture
+        self.recs = existing.recs
+        self.glyphs = existing.glyphs
 
 
 # ===-----------------------------------------------------------------------===#
@@ -463,22 +407,14 @@ struct Font:
 # ===-----------------------------------------------------------------------===#
 
 
-struct Camera3D(ImplicitlyCopyable):
+struct Camera3D(ImplicitlyCopyable, TrivialRegisterPassable):
     """Camera3D type (position, target, up, fovy, projection)."""
-
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
 
     var position: Vector3
     var target: Vector3
     var up: Vector3
     var fovy: Float32
     var projection: Int32
-
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
 
     def __init__(
         out self,
@@ -509,21 +445,13 @@ struct Camera3D(ImplicitlyCopyable):
 # ===-----------------------------------------------------------------------===#
 
 
-struct Camera2D(ImplicitlyCopyable):
+struct Camera2D(ImplicitlyCopyable, TrivialRegisterPassable):
     """Camera2D type (offset, target, rotation, zoom)."""
-
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
 
     var offset: Vector2
     var target: Vector2
     var rotation: Float32
     var zoom: Float32
-
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
 
     def __init__(
         out self,
@@ -548,23 +476,20 @@ struct Camera2D(ImplicitlyCopyable):
 # ===-----------------------------------------------------------------------===#
 
 
-struct Mesh:
+struct Mesh(ImplicitlyCopyable, TrivialRegisterPassable):
     """Mesh type (vertex and triangle data)."""
-
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
 
     var vertexCount: Int32
     var triangleCount: Int32
 
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
-
     def __init__(out self):
         self.vertexCount = 0
         self.triangleCount = 0
+
+    def __copyinit__(out self: Self, existing: Self):
+        self = Self()
+        self.vertexCount = existing.vertexCount
+        self.triangleCount = existing.triangleCount
 
 
 # ===-----------------------------------------------------------------------===#
@@ -572,23 +497,20 @@ struct Mesh:
 # ===-----------------------------------------------------------------------===#
 
 
-struct Shader:
+struct Shader(ImplicitlyCopyable, TrivialRegisterPassable):
     """Shader type (compiled shader program)."""
 
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
-
     var id: UInt32
-    var locs: Pointer[Int32, origin=_]
-
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
+    var locs: Int
 
     def __init__(out self):
         self.id = 0
-        self.locs = Pointer[Int32, origin=_]()
+        self.locs = 0
+
+    def __copyinit__(out self: Self, existing: Self):
+        self = Self()
+        self.id = existing.id
+        self.locs = existing.locs
 
 
 # ===-----------------------------------------------------------------------===#
@@ -596,25 +518,23 @@ struct Shader:
 # ===-----------------------------------------------------------------------===#
 
 
-struct MaterialMap:
+struct MaterialMap(ImplicitlyCopyable, TrivialRegisterPassable):
     """MaterialMap type (texture, color, value)."""
-
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
 
     var texture: Texture
     var color: Color
     var value: Float32
 
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
-
     def __init__(out self):
         self.texture = Texture()
         self.color = Color()
         self.value = 0.0
+
+    def __copyinit__(out self: Self, existing: Self):
+        self = Self()
+        self.texture = existing.texture
+        self.color = existing.color
+        self.value = existing.value
 
 
 # ===-----------------------------------------------------------------------===#
@@ -622,25 +542,23 @@ struct MaterialMap:
 # ===-----------------------------------------------------------------------===#
 
 
-struct Material:
+struct Material(ImplicitlyCopyable, TrivialRegisterPassable):
     """Material type (shader and material maps)."""
 
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
-
     var shader: Shader
-    var maps: Pointer[MaterialMap, origin=_]
-    var params: Pointer[Float32, origin=_]
-
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
+    var maps: Int
+    var params: Int
 
     def __init__(out self):
         self.shader = Shader()
-        self.maps = Pointer[MaterialMap, origin=_]()
-        self.params = Pointer[Float32, origin=_]()
+        self.maps = 0
+        self.params = 0
+
+    def __copyinit__(out self: Self, existing: Self):
+        self = Self()
+        self.shader = existing.shader
+        self.maps = existing.maps
+        self.params = existing.params
 
 
 # ===-----------------------------------------------------------------------===#
@@ -648,25 +566,23 @@ struct Material:
 # ===-----------------------------------------------------------------------===#
 
 
-struct Model:
+struct Model(ImplicitlyCopyable, TrivialRegisterPassable):
     """Model type (3D mesh and material hierarchy)."""
-
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
 
     var transform: Matrix
     var meshCount: Int32
     var materialCount: Int32
 
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
-
     def __init__(out self):
         self.transform = Matrix()
         self.meshCount = 0
         self.materialCount = 0
+
+    def __copyinit__(out self: Self, existing: Self):
+        self = Self()
+        self.transform = existing.transform
+        self.meshCount = existing.meshCount
+        self.materialCount = existing.materialCount
 
 
 # ===-----------------------------------------------------------------------===#
@@ -677,16 +593,8 @@ struct Model:
 struct Ray(ImplicitlyCopyable, TrivialRegisterPassable):
     """Ray type (origin position and direction)."""
 
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
-
     var position: Vector3
     var direction: Vector3
-
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
 
     def __init__(
         out self,
@@ -705,21 +613,13 @@ struct Ray(ImplicitlyCopyable, TrivialRegisterPassable):
 # ===-----------------------------------------------------------------------===#
 
 
-struct RayCollision(ImplicitlyCopyable):
+struct RayCollision(ImplicitlyCopyable, TrivialRegisterPassable):
     """RayCollision type (hit details)."""
-
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
 
     var hit: Bool
     var distance: Float32
     var point: Vector3
     var normal: Vector3
-
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
 
     def __init__(out self):
         self.hit = False
@@ -743,16 +643,8 @@ struct RayCollision(ImplicitlyCopyable):
 struct BoundingBox(ImplicitlyCopyable, TrivialRegisterPassable):
     """BoundingBox type (min and max Vector3 corners)."""
 
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
-
     var min: Vector3
     var max: Vector3
-
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
 
     def __init__(
         out self,
@@ -771,29 +663,29 @@ struct BoundingBox(ImplicitlyCopyable, TrivialRegisterPassable):
 # ===-----------------------------------------------------------------------===#
 
 
-struct Wave:
+struct Wave(ImplicitlyCopyable, TrivialRegisterPassable):
     """Wave audio data type (PCM audio samples)."""
-
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
 
     var frameCount: UInt32
     var sampleRate: UInt32
     var sampleSize: UInt32
     var channels: UInt32
-    var data: Pointer[c_void, origin=_]
-
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
+    var data: Int
 
     def __init__(out self):
         self.frameCount = 0
         self.sampleRate = 0
         self.sampleSize = 0
         self.channels = 0
-        self.data = Pointer[c_void, origin=_]()
+        self.data = 0
+
+    def __copyinit__(out self: Self, existing: Self):
+        self = Self()
+        self.frameCount = existing.frameCount
+        self.sampleRate = existing.sampleRate
+        self.sampleSize = existing.sampleSize
+        self.channels = existing.channels
+        self.data = existing.data
 
 
 # ===-----------------------------------------------------------------------===#
@@ -801,29 +693,29 @@ struct Wave:
 # ===-----------------------------------------------------------------------===#
 
 
-struct AudioStream:
+struct AudioStream(ImplicitlyCopyable, TrivialRegisterPassable):
     """AudioStream type (raw audio stream buffer)."""
 
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
-
-    var buffer: Pointer[c_void, origin=_]
-    var processor: Pointer[c_void, origin=_]
+    var buffer: Int
+    var processor: Int
     var sampleRate: UInt32
     var sampleSize: UInt32
     var channels: UInt32
 
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
-
     def __init__(out self):
-        self.buffer = Pointer[c_void, origin=_]()
-        self.processor = Pointer[c_void, origin=_]()
+        self.buffer = 0
+        self.processor = 0
         self.sampleRate = 0
         self.sampleSize = 0
         self.channels = 0
+
+    def __copyinit__(out self: Self, existing: Self):
+        self = Self()
+        self.buffer = existing.buffer
+        self.processor = existing.processor
+        self.sampleRate = existing.sampleRate
+        self.sampleSize = existing.sampleSize
+        self.channels = existing.channels
 
 
 # ===-----------------------------------------------------------------------===#
@@ -831,23 +723,20 @@ struct AudioStream:
 # ===-----------------------------------------------------------------------===#
 
 
-struct Sound:
+struct Sound(ImplicitlyCopyable, TrivialRegisterPassable):
     """Sound audio source type."""
-
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
 
     var stream: AudioStream
     var frameCount: UInt32
 
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
-
     def __init__(out self):
         self.stream = AudioStream()
         self.frameCount = 0
+
+    def __copyinit__(out self: Self, existing: Self):
+        self = Self()
+        self.stream = existing.stream
+        self.frameCount = existing.frameCount
 
 
 # ===-----------------------------------------------------------------------===#
@@ -855,26 +744,26 @@ struct Sound:
 # ===-----------------------------------------------------------------------===#
 
 
-struct Music:
+struct Music(ImplicitlyCopyable, TrivialRegisterPassable):
     """Music audio stream type."""
-
-    # ===-------------------------------------------------------------------===#
-    # Fields
-    # ===-------------------------------------------------------------------===#
 
     var stream: AudioStream
     var frameCount: UInt32
     var looping: Bool
     var ctxType: Int32
-    var ctxData: Pointer[c_void, origin=_]
-
-    # ===-------------------------------------------------------------------===#
-    # Life cycle methods
-    # ===-------------------------------------------------------------------===#
+    var ctxData: Int
 
     def __init__(out self):
         self.stream = AudioStream()
         self.frameCount = 0
         self.looping = False
         self.ctxType = 0
-        self.ctxData = Pointer[c_void, origin=_]()
+        self.ctxData = 0
+
+    def __copyinit__(out self: Self, existing: Self):
+        self = Self()
+        self.stream = existing.stream
+        self.frameCount = existing.frameCount
+        self.looping = existing.looping
+        self.ctxType = existing.ctxType
+        self.ctxData = existing.ctxData
