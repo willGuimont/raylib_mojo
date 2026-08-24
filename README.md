@@ -60,31 +60,31 @@ cd mojo_raylib
 pixi run build-raylib
 ```
 
-### Using in Your Own Pixi Project
+---
 
-To use `raylib-mojo` in your own Pixi + Mojo project:
+## How to Use `raylib-mojo` in Your Projects
 
-#### 1. Add `raylib_mojo` as a submodule
+You can use `raylib-mojo` in your own Mojo + Pixi projects in two simple steps:
 
-In your project root, add `raylib_mojo` (and its submodules) to a subdirectory such as `third_party/`:
+### 1. Add `raylib-mojo` as a Git Submodule
+
+In your project repository root, add `raylib_mojo` as a submodule:
 
 ```bash
 git submodule add https://github.com/willGuimont/mojo_raylib third_party/raylib_mojo
 git submodule update --init --recursive
 ```
 
-#### 2. Configure `pixi.toml` / `mojoproject.toml`
+### 2. Configure `pixi.toml` / `mojoproject.toml`
 
-Ensure `channels` includes the Modular channel (`https://conda.modular.com/max`), and `max`, `mojo`, `cmake`, `ninja`, and `make` are included in your dependencies so Pixi can manage Mojo and build `libraylib`. Add tasks to build `raylib` and run your app with the required import (`-I`), library path (`-L`), runtime search path (`-rpath`), and linker (`-lraylib`) flags:
+Configure your project configuration file to include build tools and dependencies. Specify `depends-on = ["build-raylib"]` on your application task so running your app automatically builds `libraylib.so` first:
 
 ```toml
 [workspace]
+name = "my_mojo_game"
+version = "0.1.0"
 channels = ["conda-forge", "https://conda.modular.com/max"]
 platforms = ["linux-64"]
-
-[tasks]
-build-raylib = "cmake -B third_party/raylib_mojo/build/raylib -S third_party/raylib_mojo/third_party/raylib -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON && cmake --build third_party/raylib_mojo/build/raylib"
-start = "mojo run -I third_party/raylib_mojo/src -Xlinker -Lthird_party/raylib_mojo/build/raylib/raylib -Xlinker -rpath -Xlinker third_party/raylib_mojo/build/raylib/raylib -Xlinker -lraylib main.mojo"
 
 [dependencies]
 max = ">=26.5.0"
@@ -92,19 +92,38 @@ mojo = ">=1.0.0"
 cmake = "*"
 ninja = "*"
 make = "*"
+
+[tasks]
+# Build raylib shared C library
+build-raylib = "cmake -B third_party/raylib_mojo/build/raylib -S third_party/raylib_mojo/third_party/raylib -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON && cmake --build third_party/raylib_mojo/build/raylib"
+
+# Run your Mojo main application (depends on build-raylib task)
+start = { cmd = "mojo run -I third_party/raylib_mojo/src -Xlinker -Lthird_party/raylib_mojo/build/raylib/raylib -Xlinker -rpath -Xlinker third_party/raylib_mojo/build/raylib/raylib -Xlinker -lraylib main.mojo", depends-on = ["build-raylib"] }
 ```
 
-#### 3. Build & Run
+### 3. Build & Run Your Project
 
-Build the `raylib` shared library and launch your application:
+Simply execute your task, Pixi will automatically compile `libraylib.so` if needed and launch your Mojo application:
 
 ```bash
-# Build raylib shared library
-pixi run build-raylib
-
-# Run your Mojo main program
 pixi run start
 ```
+
+---
+
+## GPU & Compute Kernel Demos
+
+`raylib-mojo` demonstrates GPU acceleration combining MAX `DeviceContext` / `std.gpu` kernels with Raylib framebuffer rendering:
+
+| Mandelbrot & Julia Fractals (`pixi run gpu-mandelbrot`) | N-Body Galaxy Simulation (`pixi run gpu-nbody`) |
+| :---: | :---: |
+| ![Mandelbrot GPU Kernel](media/gpu_mandelbrot.png) | ![N-Body Galaxy GPU Kernel](media/gpu_nbody.gif) |
+
+| Real-Time Sphere Raytracer (`pixi run gpu-raytracer`) | Reaction-Diffusion PDE (`pixi run gpu-reaction-diffusion`) |
+| :---: | :---: |
+| ![Sphere Raytracer GPU Kernel](media/gpu_raytracer.png) | ![Reaction-Diffusion PDE GPU Kernel](media/gpu_reaction_diffusion.gif) |
+
+---
 
 ## Examples
 
@@ -134,19 +153,20 @@ Run any of the included examples using Pixi tasks:
 | **Real-Time Sphere Raytracer** | `pixi run gpu-raytracer` | Per-pixel ray casting, sphere intersection, specular lighting, and reflection bounce compute kernel (240,000+ rays/frame) |
 | **Reaction-Diffusion PDE** | `pixi run gpu-reaction-diffusion` | 2D Gray-Scott partial differential equation kernel with 9-point Laplacian stencil convolution for dynamic organic pattern growth |
 
+---
+
 ## Development & Automatic Binding Generation
 
-`raylib-mojo` includes a pure Mojo automatic binding generator script (`scripts/generate_bindings.mojo`) that parses Raylib's C declarations from `raylib.h`, maps C types to Mojo types, and verifies each symbol dynamically against `libraylib.so`.
+`raylib-mojo` includes a pure Mojo automatic binding generator script ([scripts/generate_bindings.mojo](scripts/generate_bindings.mojo)) that parses Raylib's C declarations from `raylib.h`, `raymath.h`, `rlgl.h`, `rcamera.h`, and `rgestures.h`, maps C types to Mojo types, and verifies each symbol dynamically against `libraylib.so`.
 
-To regenerate the low-level C FFI wrappers into `src/raylib/c.mojo`:
+To regenerate the bindings:
 
 ```bash
-# Build libraylib.so first if not built already
-pixi run build-raylib
-
-# Regenerate bindings
+# Automatically builds libraylib.so and regenerates bindings into src/raylib/
 pixi run generate-bindings
 ```
+
+---
 
 ## Contributing
 
