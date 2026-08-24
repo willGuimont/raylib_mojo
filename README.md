@@ -1,6 +1,6 @@
 ![raylib mojo logo](logo/raylib_mojo_logo.png)
 
-# raylib-mojo
+# raylib_mojo
 
 [![raylib version](https://img.shields.io/badge/raylib-v6.1--dev-blue.svg)](https://github.com/raysan5/raylib)
 [![mojo version](https://img.shields.io/badge/mojo-v1.0-orange.svg)](https://mojolang.org)
@@ -62,11 +62,11 @@ pixi run build-raylib
 
 ---
 
-## How to Use `raylib-mojo` in Your Projects
+## How to Use `raylib_mojo` in Your Projects
 
-You can use `raylib-mojo` in your own Mojo + Pixi projects in two simple steps:
+You can use `raylib_mojo` in your own Mojo + Pixi projects in two simple steps:
 
-### 1. Add `raylib-mojo` as a Git Submodule
+### 1. Add `raylib_mojo` as a Git Submodule
 
 In your project repository root, add `raylib_mojo` as a submodule:
 
@@ -113,7 +113,7 @@ pixi run start
 
 ## GPU & Compute Kernel Demos
 
-`raylib-mojo` demonstrates GPU acceleration combining MAX `DeviceContext` / `std.gpu` kernels with Raylib framebuffer rendering:
+Examples demonstrating GPU acceleration combining MAX `DeviceContext` / `std.gpu` kernels with Raylib framebuffer rendering:
 
 | Mandelbrot & Julia Fractals (`pixi run gpu-mandelbrot`) | N-Body Galaxy Simulation (`pixi run gpu-nbody`) |
 | :---: | :---: |
@@ -157,7 +157,7 @@ Run any of the included examples using Pixi tasks:
 
 ## Development & Automatic Binding Generation
 
-`raylib-mojo` includes a pure Mojo automatic binding generator script ([scripts/generate_bindings.mojo](scripts/generate_bindings.mojo)) that parses Raylib's C declarations from `raylib.h`, `raymath.h`, `rlgl.h`, `rcamera.h`, and `rgestures.h`, maps C types to Mojo types, and verifies each symbol dynamically against `libraylib.so`.
+`raylib_mojo` includes a pure Mojo automatic binding generator script ([scripts/generate_bindings.mojo](scripts/generate_bindings.mojo)) that parses Raylib's C declarations from `raylib.h`, `raymath.h`, `rlgl.h`, `rcamera.h`, and `rgestures.h`, maps C types to Mojo types, and verifies each symbol dynamically against `libraylib.so`.
 
 To regenerate the bindings:
 
