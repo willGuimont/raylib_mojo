@@ -17,9 +17,6 @@ struct Vector2(ImplicitlyCopyable, TrivialRegisterPassable):
         self.x = x
         self.y = y
 
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self(existing.x, existing.y)
-
 
 # ===-----------------------------------------------------------------------===#
 # Vector3
@@ -42,9 +39,6 @@ struct Vector3(ImplicitlyCopyable, TrivialRegisterPassable):
         self.x = x
         self.y = y
         self.z = z
-
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self(existing.x, existing.y, existing.z)
 
 
 # ===-----------------------------------------------------------------------===#
@@ -72,9 +66,6 @@ struct Vector4(ImplicitlyCopyable, TrivialRegisterPassable):
         self.z = z
         self.w = w
 
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self(existing.x, existing.y, existing.z, existing.w)
-
 
 # ===-----------------------------------------------------------------------===#
 # Quaternion
@@ -100,9 +91,6 @@ struct Quaternion(ImplicitlyCopyable, TrivialRegisterPassable):
         self.y = y
         self.z = z
         self.w = w
-
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self(existing.x, existing.y, existing.z, existing.w)
 
 
 # ===-----------------------------------------------------------------------===#
@@ -148,25 +136,6 @@ struct Matrix(ImplicitlyCopyable, TrivialRegisterPassable):
         self.m11 = 0.0
         self.m15 = 1.0
 
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self()
-        self.m0 = existing.m0
-        self.m4 = existing.m4
-        self.m8 = existing.m8
-        self.m12 = existing.m12
-        self.m1 = existing.m1
-        self.m5 = existing.m5
-        self.m9 = existing.m9
-        self.m13 = existing.m13
-        self.m2 = existing.m2
-        self.m6 = existing.m6
-        self.m10 = existing.m10
-        self.m14 = existing.m14
-        self.m3 = existing.m3
-        self.m7 = existing.m7
-        self.m11 = existing.m11
-        self.m15 = existing.m15
-
 
 # ===-----------------------------------------------------------------------===#
 # Color
@@ -188,9 +157,6 @@ struct Color(ImplicitlyCopyable, TrivialRegisterPassable):
         self.g = g
         self.b = b
         self.a = a
-
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self(existing.r, existing.g, existing.b, existing.a)
 
 
 # ===-----------------------------------------------------------------------===#
@@ -218,9 +184,6 @@ struct Rectangle(ImplicitlyCopyable, TrivialRegisterPassable):
         self.width = width
         self.height = height
 
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self(existing.x, existing.y, existing.width, existing.height)
-
 
 # ===-----------------------------------------------------------------------===#
 # Image
@@ -242,14 +205,6 @@ struct Image(ImplicitlyCopyable, TrivialRegisterPassable):
         self.height = 0
         self.mipmaps = 0
         self.format = 0
-
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self()
-        self.data = existing.data
-        self.width = existing.width
-        self.height = existing.height
-        self.mipmaps = existing.mipmaps
-        self.format = existing.format
 
 
 # ===-----------------------------------------------------------------------===#
@@ -273,14 +228,6 @@ struct Texture(ImplicitlyCopyable, TrivialRegisterPassable):
         self.mipmaps = 0
         self.format = 0
 
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self()
-        self.id = existing.id
-        self.width = existing.width
-        self.height = existing.height
-        self.mipmaps = existing.mipmaps
-        self.format = existing.format
-
 
 # ===-----------------------------------------------------------------------===#
 # RenderTexture
@@ -298,12 +245,6 @@ struct RenderTexture(ImplicitlyCopyable, TrivialRegisterPassable):
         self.id = 0
         self.texture = Texture()
         self.depth = Texture()
-
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self()
-        self.id = existing.id
-        self.texture = existing.texture
-        self.depth = existing.depth
 
 
 # ===-----------------------------------------------------------------------===#
@@ -329,15 +270,6 @@ struct NPatchInfo(ImplicitlyCopyable, TrivialRegisterPassable):
         self.bottom = 0
         self.layout = 0
 
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self()
-        self.source = existing.source
-        self.left = existing.left
-        self.top = existing.top
-        self.right = existing.right
-        self.bottom = existing.bottom
-        self.layout = existing.layout
-
 
 # ===-----------------------------------------------------------------------===#
 # GlyphInfo
@@ -359,14 +291,6 @@ struct GlyphInfo(ImplicitlyCopyable, TrivialRegisterPassable):
         self.offsetY = 0
         self.advanceX = 0
         self.image = Image()
-
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self()
-        self.value = existing.value
-        self.offsetX = existing.offsetX
-        self.offsetY = existing.offsetY
-        self.advanceX = existing.advanceX
-        self.image = existing.image
 
 
 # ===-----------------------------------------------------------------------===#
@@ -391,15 +315,6 @@ struct Font(ImplicitlyCopyable, TrivialRegisterPassable):
         self.texture = Texture()
         self.recs = 0
         self.glyphs = 0
-
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self()
-        self.baseSize = existing.baseSize
-        self.glyphCount = existing.glyphCount
-        self.glyphPadding = existing.glyphPadding
-        self.texture = existing.texture
-        self.recs = existing.recs
-        self.glyphs = existing.glyphs
 
 
 # ===-----------------------------------------------------------------------===#
@@ -430,15 +345,6 @@ struct Camera3D(ImplicitlyCopyable, TrivialRegisterPassable):
         self.fovy = fovy
         self.projection = projection
 
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self(
-            existing.position,
-            existing.target,
-            existing.up,
-            existing.fovy,
-            existing.projection,
-        )
-
 
 # ===-----------------------------------------------------------------------===#
 # Camera2D
@@ -465,11 +371,6 @@ struct Camera2D(ImplicitlyCopyable, TrivialRegisterPassable):
         self.rotation = rotation
         self.zoom = zoom
 
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self(
-            existing.offset, existing.target, existing.rotation, existing.zoom
-        )
-
 
 # ===-----------------------------------------------------------------------===#
 # Mesh
@@ -486,11 +387,6 @@ struct Mesh(ImplicitlyCopyable, TrivialRegisterPassable):
         self.vertexCount = 0
         self.triangleCount = 0
 
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self()
-        self.vertexCount = existing.vertexCount
-        self.triangleCount = existing.triangleCount
-
 
 # ===-----------------------------------------------------------------------===#
 # Shader
@@ -506,11 +402,6 @@ struct Shader(ImplicitlyCopyable, TrivialRegisterPassable):
     def __init__(out self):
         self.id = 0
         self.locs = 0
-
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self()
-        self.id = existing.id
-        self.locs = existing.locs
 
 
 # ===-----------------------------------------------------------------------===#
@@ -530,12 +421,6 @@ struct MaterialMap(ImplicitlyCopyable, TrivialRegisterPassable):
         self.color = Color()
         self.value = 0.0
 
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self()
-        self.texture = existing.texture
-        self.color = existing.color
-        self.value = existing.value
-
 
 # ===-----------------------------------------------------------------------===#
 # Material
@@ -554,12 +439,6 @@ struct Material(ImplicitlyCopyable, TrivialRegisterPassable):
         self.maps = 0
         self.params = 0
 
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self()
-        self.shader = existing.shader
-        self.maps = existing.maps
-        self.params = existing.params
-
 
 # ===-----------------------------------------------------------------------===#
 # Model
@@ -577,12 +456,6 @@ struct Model(ImplicitlyCopyable, TrivialRegisterPassable):
         self.transform = Matrix()
         self.meshCount = 0
         self.materialCount = 0
-
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self()
-        self.transform = existing.transform
-        self.meshCount = existing.meshCount
-        self.materialCount = existing.materialCount
 
 
 # ===-----------------------------------------------------------------------===#
@@ -604,9 +477,6 @@ struct Ray(ImplicitlyCopyable, TrivialRegisterPassable):
         self.position = position
         self.direction = direction
 
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self(existing.position, existing.direction)
-
 
 # ===-----------------------------------------------------------------------===#
 # RayCollision
@@ -627,13 +497,6 @@ struct RayCollision(ImplicitlyCopyable, TrivialRegisterPassable):
         self.point = Vector3()
         self.normal = Vector3()
 
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self()
-        self.hit = existing.hit
-        self.distance = existing.distance
-        self.point = existing.point
-        self.normal = existing.normal
-
 
 # ===-----------------------------------------------------------------------===#
 # BoundingBox
@@ -653,9 +516,6 @@ struct BoundingBox(ImplicitlyCopyable, TrivialRegisterPassable):
     ):
         self.min = min
         self.max = max
-
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self(existing.min, existing.max)
 
 
 # ===-----------------------------------------------------------------------===#
@@ -679,14 +539,6 @@ struct Wave(ImplicitlyCopyable, TrivialRegisterPassable):
         self.channels = 0
         self.data = 0
 
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self()
-        self.frameCount = existing.frameCount
-        self.sampleRate = existing.sampleRate
-        self.sampleSize = existing.sampleSize
-        self.channels = existing.channels
-        self.data = existing.data
-
 
 # ===-----------------------------------------------------------------------===#
 # AudioStream
@@ -709,14 +561,6 @@ struct AudioStream(ImplicitlyCopyable, TrivialRegisterPassable):
         self.sampleSize = 0
         self.channels = 0
 
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self()
-        self.buffer = existing.buffer
-        self.processor = existing.processor
-        self.sampleRate = existing.sampleRate
-        self.sampleSize = existing.sampleSize
-        self.channels = existing.channels
-
 
 # ===-----------------------------------------------------------------------===#
 # Sound
@@ -732,11 +576,6 @@ struct Sound(ImplicitlyCopyable, TrivialRegisterPassable):
     def __init__(out self):
         self.stream = AudioStream()
         self.frameCount = 0
-
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self()
-        self.stream = existing.stream
-        self.frameCount = existing.frameCount
 
 
 # ===-----------------------------------------------------------------------===#
@@ -759,11 +598,3 @@ struct Music(ImplicitlyCopyable, TrivialRegisterPassable):
         self.looping = False
         self.ctxType = 0
         self.ctxData = 0
-
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self()
-        self.stream = existing.stream
-        self.frameCount = existing.frameCount
-        self.looping = existing.looping
-        self.ctxType = existing.ctxType
-        self.ctxData = existing.ctxData

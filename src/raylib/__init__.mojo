@@ -181,3 +181,11 @@ from raylib.audio import (
 )
 
 import raylib.c as c
+import raylib.c_math as c_math
+import raylib.c_rlgl as c_rlgl
+import raylib.c_camera as c_camera
+import raylib.c_gestures as c_gestures
+import raylib.raymath as raymath
+import raylib.rlgl as rlgl
+import raylib.rcamera as rcamera
+import raylib.rgestures as rgestures

@@ -6,7 +6,7 @@ from raylib import c
 
 def init_window(width: Int32, height: Int32, title: String):
     """Initialize window and OpenGL context."""
-    var title_buf = title
+    var title_buf = title + "\0"
     c.InitWindow(width, height, title_buf.unsafe_ptr())
 
 
@@ -57,5 +57,5 @@ def toggle_fullscreen():
 
 def take_screenshot(file_name: String):
     """Take a screenshot of current frame and save to file_name."""
-    var file_buf = file_name
+    var file_buf = file_name + "\0"
     c.TakeScreenshot(file_buf.unsafe_ptr())

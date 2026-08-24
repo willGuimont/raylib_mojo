@@ -15,7 +15,6 @@ make = "*"
 
 [tasks]
 format = "mojo format ."
-format-check = "mojo format --check ."
 build-raylib = "cmake -B build/raylib -S third_party/raylib -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON && cmake --build build/raylib"
 generate-bindings = "mojo run scripts/generate_bindings.mojo"
 example-logo = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/raylib_mojo_logo.mojo"
@@ -28,3 +27,7 @@ example-audio-stream = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker 
 example-sprite-anim = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/textures_sprite_animation.mojo"
 example-particle-assembly = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/particle_assembly.mojo"
 example-game-of-life = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/shaders_game_of_life.mojo"
+gpu-mandelbrot = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/gpu_mandelbrot.mojo"
+gpu-nbody = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/gpu_nbody.mojo"
+gpu-raytracer = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/gpu_raytracer.mojo"
+gpu-reaction-diffusion = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/gpu_reaction_diffusion.mojo"

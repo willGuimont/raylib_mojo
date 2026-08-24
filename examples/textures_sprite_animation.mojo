@@ -44,8 +44,11 @@ comptime SCREEN_W = 800
 comptime SCREEN_H = 450
 comptime NUM_FRAMES = 8
 
+
 def main():
-    init_window(SCREEN_W, SCREEN_H, "raylib [textures] example - sprite animation")
+    init_window(
+        SCREEN_W, SCREEN_H, "raylib [textures] example - sprite animation"
+    )
     set_target_fps(60)
 
     # Create a procedural 8-frame animated sprite sheet image (64x64 per frame -> 512x64 image)
@@ -67,7 +70,9 @@ def main():
         # Draw frame background
         c.ImageDrawRectangle(img_ptr, Int32(start_x + 4), 4, 56, 56, col)
         # Draw inner frame pattern
-        c.ImageDrawCircle(img_ptr, Int32(start_x + 32), 32, Int32(10 + f * 2), RAYWHITE())
+        c.ImageDrawCircle(
+            img_ptr, Int32(start_x + 32), 32, Int32(10 + f * 2), RAYWHITE()
+        )
 
     var sprite_texture = c.LoadTextureFromImage(img)
     c.UnloadImage(img)
@@ -103,13 +108,15 @@ def main():
         # Sprite Source Rectangle clipping current frame
         var frame_width = Float32(sprite_texture.width) / Float32(NUM_FRAMES)
         var frame_height = Float32(sprite_texture.height)
-        var frame_rec = Rectangle(Float32(current_frame) * frame_width, 0.0, frame_width, frame_height)
+        var frame_rec = Rectangle(
+            Float32(current_frame) * frame_width, 0.0, frame_width, frame_height
+        )
 
         # Position to draw sprite (centered on screen, scaled x3)
         var scale: Float32 = 3.0
         var position = Vector2(
             Float32(SCREEN_W / 2) - (frame_width * scale / 2.0),
-            Float32(SCREEN_H / 2) - (frame_height * scale / 2.0)
+            Float32(SCREEN_H / 2) - (frame_height * scale / 2.0),
         )
 
         begin_drawing()
@@ -117,25 +124,53 @@ def main():
 
         draw_text("2D SPRITE SHEET ANIMATION", 240, 40, 20, DARKGRAY())
         draw_text("PRESS SPACE TO PAUSE / RESUME", 250, 80, 16, DARKGRAY())
-        draw_text("PRESS UP/DOWN TO CHANGE ANIMATION SPEED", 200, 105, 16, DARKGRAY())
+        draw_text(
+            "PRESS UP/DOWN TO CHANGE ANIMATION SPEED", 200, 105, 16, DARKGRAY()
+        )
 
         # Render full sprite sheet preview at bottom
         draw_text("Sprite Sheet Source (8 Frames):", 100, 320, 16, DARKGRAY())
         c.DrawTexture(sprite_texture, 140, 350, WHITE())
-        c.DrawRectangleLines(Int32(140 + Int(Float32(current_frame) * frame_width)), 350, Int32(frame_width), Int32(frame_height), RED())
+        c.DrawRectangleLines(
+            Int32(140 + Int(Float32(current_frame) * frame_width)),
+            350,
+            Int32(frame_width),
+            Int32(frame_height),
+            RED(),
+        )
 
         # Render scaled current animated frame
         c.DrawTexturePro(
             sprite_texture,
             frame_rec,
-            Rectangle(position.x, position.y, frame_width * scale, frame_height * scale),
+            Rectangle(
+                position.x,
+                position.y,
+                frame_width * scale,
+                frame_height * scale,
+            ),
             Vector2(0.0, 0.0),
             0.0,
-            WHITE()
+            WHITE(),
         )
 
-        draw_text("Frame: " + String(Int(current_frame + 1)) + " / " + String(NUM_FRAMES), 350, 270, 18, DARKGRAY())
-        draw_text("Speed: " + String(Int(anim_fps)) + " FPS", 350, 290, 18, RED() if is_paused else BLUE())
+        draw_text(
+            "Frame: "
+            + String(Int(current_frame + 1))
+            + " / "
+            + String(NUM_FRAMES),
+            350,
+            270,
+            18,
+            DARKGRAY(),
+        )
+        draw_text(
+            "Speed: " + String(Int(anim_fps)) + " FPS",
+            350,
+            290,
+            18,
+            RED() if is_paused else BLUE(),
+        )
 
         if is_paused:
             draw_text("PAUSED", 360, 210, 24, RED())

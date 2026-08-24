@@ -17,6 +17,7 @@ from raylib import (
     Vector3,
     Camera3D,
     CAMERA_PERSPECTIVE,
+    rcamera,
     RAYWHITE,
     DARKGRAY,
     RED,
@@ -43,6 +44,7 @@ def main():
     )
 
     while not window_should_close():
+        rcamera.camera_yaw(camera, 0.005, True)
         begin_drawing()
         clear_background(RAYWHITE())
 

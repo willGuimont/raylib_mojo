@@ -47,6 +47,7 @@ comptime SCREEN_W = 1000
 comptime SCREEN_H = 600
 comptime NUM_PARTICLES = 1200
 
+
 struct Particle(ImplicitlyCopyable, TrivialRegisterPassable):
     var pos: Vector2
     var vel: Vector2
@@ -61,13 +62,6 @@ struct Particle(ImplicitlyCopyable, TrivialRegisterPassable):
         self.color = Color()
         self.radius = 2.0
 
-    def __copyinit__(out self: Self, existing: Self):
-        self = Self()
-        self.pos = existing.pos
-        self.vel = existing.vel
-        self.target = existing.target
-        self.color = existing.color
-        self.radius = existing.radius
 
 def generate_shape_targets(shape_type: Int, mut particles: List[Particle]):
     var center_x = Float32(SCREEN_W / 2)
@@ -75,8 +69,8 @@ def generate_shape_targets(shape_type: Int, mut particles: List[Particle]):
 
     for i in range(NUM_PARTICLES):
         var t = Float32(i)
-        var tx: Float32 = center_x
-        var ty: Float32 = center_y
+        var tx: Float32
+        var ty: Float32
 
         if shape_type == 0:
             # Grid Pattern
@@ -96,14 +90,22 @@ def generate_shape_targets(shape_type: Int, mut particles: List[Particle]):
             var angle = (t / Float32(NUM_PARTICLES)) * 6.28318530718
             var scale: Float32 = 12.0
             tx = center_x + scale * 16.0 * sin(angle) * sin(angle) * sin(angle)
-            ty = center_y - scale * (13.0 * cos(angle) - 5.0 * cos(2.0 * angle) - 2.0 * cos(3.0 * angle) - cos(4.0 * angle))
+            ty = center_y - scale * (
+                13.0 * cos(angle)
+                - 5.0 * cos(2.0 * angle)
+                - 2.0 * cos(3.0 * angle)
+                - cos(4.0 * angle)
+            )
 
         var p = particles[i]
         p.target = Vector2(tx, ty)
         particles[i] = p
 
+
 def main():
-    init_window(SCREEN_W, SCREEN_H, "raylib [particles] example - particle assembly")
+    init_window(
+        SCREEN_W, SCREEN_H, "raylib [particles] example - particle assembly"
+    )
     set_target_fps(60)
 
     # Initialize Particles
@@ -122,11 +124,10 @@ def main():
         var p = Particle()
         p.pos = Vector2(
             Float32(c.GetRandomValue(50, SCREEN_W - 50)),
-            Float32(c.GetRandomValue(50, SCREEN_H - 50))
+            Float32(c.GetRandomValue(50, SCREEN_H - 50)),
         )
         p.vel = Vector2(
-            Float32(c.GetRandomValue(-5, 5)),
-            Float32(c.GetRandomValue(-5, 5))
+            Float32(c.GetRandomValue(-5, 5)), Float32(c.GetRandomValue(-5, 5))
         )
         p.color = palette[i % len(palette)]
         p.radius = Float32(c.GetRandomValue(2, 4))
@@ -146,7 +147,7 @@ def main():
                 var p = particles[i]
                 p.pos = Vector2(
                     Float32(c.GetRandomValue(50, SCREEN_W - 50)),
-                    Float32(c.GetRandomValue(50, SCREEN_H - 50))
+                    Float32(c.GetRandomValue(50, SCREEN_H - 50)),
                 )
                 particles[i] = p
 
@@ -176,7 +177,7 @@ def main():
                 var dx = px - mouse_pos.x
                 var dy = py - mouse_pos.y
                 var dist_sq = dx * dx + dy * dy
-                if dist_sq < 22500.0 and dist_sq > 0.0: # 150px radius
+                if dist_sq < 22500.0 and dist_sq > 0.0:  # 150px radius
                     var dist = sqrt(dist_sq)
                     var force = (150.0 - dist) * 15.0
                     ax += (dx / dist) * force
@@ -201,13 +202,39 @@ def main():
             var p = particles[i]
             draw_circle_v(p.pos, p.radius, p.color)
 
-        draw_text("INTERACTIVE PARTICLE ASSEMBLY SIMULATION", 260, 30, 20, DARKGRAY())
-        draw_text("SPACE: Switch Formation (Grid / Circles / Heart)", 270, 70, 16, DARKGRAY())
-        draw_text("LEFT MOUSE DRAG: Repel particles with force", 300, 95, 16, DARKGRAY())
+        draw_text(
+            "INTERACTIVE PARTICLE ASSEMBLY SIMULATION", 260, 30, 20, DARKGRAY()
+        )
+        draw_text(
+            "SPACE: Switch Formation (Grid / Circles / Heart)",
+            270,
+            70,
+            16,
+            DARKGRAY(),
+        )
+        draw_text(
+            "LEFT MOUSE DRAG: Repel particles with force",
+            300,
+            95,
+            16,
+            DARKGRAY(),
+        )
         draw_text("R: Reset particle positions", 380, 120, 16, DARKGRAY())
 
-        var shape_name = "Grid" if shape_type == 0 else ("Circles" if shape_type == 1 else "Heart")
-        draw_text("Formation: " + shape_name + " (" + String(NUM_PARTICLES) + " Particles)", 340, 540, 18, RED())
+        var shape_name = "Grid" if shape_type == 0 else (
+            "Circles" if shape_type == 1 else "Heart"
+        )
+        draw_text(
+            "Formation: "
+            + shape_name
+            + " ("
+            + String(NUM_PARTICLES)
+            + " Particles)",
+            340,
+            540,
+            18,
+            RED(),
+        )
 
         draw_fps(10, 10)
         end_drawing()

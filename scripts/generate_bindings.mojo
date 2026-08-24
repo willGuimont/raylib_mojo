@@ -14,6 +14,17 @@ def map_c_type_to_mojo(c_type_str: String) -> String:
         return "Camera3D"
     if c_type == "Quaternion":
         return "Vector4"
+    if c_type == "float3":
+        return "Vector3"
+    if c_type == "float16":
+        return "Matrix"
+    if (
+        c_type == "rlRenderBatch"
+        or c_type == "rlVertexBuffer"
+        or c_type == "rlDrawCall"
+        or c_type == "rlglData"
+    ):
+        return "Pointer[NoneType, origin=_]"
 
     if c_type == "void":
         return "NoneType"
@@ -136,21 +147,22 @@ def sanitize_name(name_str: String) -> String:
         or n == "not"
         or n == "and"
         or n == "or"
+        or n == "matrix"
     ):
         return n + "_"
     return String(n)
 
 
-def main() raises:
-    print("=== Raylib Mojo Automatic Binding Generator ===")
-    var header_path = "third_party/raylib/src/raylib.h"
+def generate_module_bindings(
+    ref handle: OwnedDLHandle,
+    header_path: String,
+    out_path: String,
+    macro_prefix: String,
+) raises:
+    print("Generating bindings for:", header_path, "->", out_path)
     var f = open(header_path, "r")
     var text = f.read()
     f.close()
-
-    var lib_path = "build/raylib/raylib/libraylib.so"
-    var handle = OwnedDLHandle(lib_path)
-    print("Loaded shared object and verified symbols.")
 
     var raw_lines = text.split("\n")
     var clean_lines = List[String]()
@@ -169,17 +181,40 @@ def main() raises:
     var idx = 0
     while idx < len(clean_lines):
         var line = clean_lines[idx]
-        if line.startswith("RLAPI "):
+        var is_target = False
+        if macro_prefix.byte_length() > 0:
+            if line.startswith(macro_prefix + " "):
+                is_target = True
+        else:
+            if (
+                line.startswith("RLAPI ")
+                or line.startswith("void SetGestures")
+                or line.startswith("bool IsGesture")
+                or line.startswith("int GetGesture")
+                or line.startswith("float GetGesture")
+                or line.startswith("Vector2 GetGesture")
+                or line.startswith("void ProcessGesture")
+                or line.startswith("void UpdateGestures")
+            ):
+                is_target = True
+
+        if is_target:
             var decl = String(line)
-            while not decl.endswith(";") and idx + 1 < len(clean_lines):
+            while (
+                not decl.endswith(";")
+                and not decl.endswith("{")
+                and idx + 1 < len(clean_lines)
+            ):
                 idx += 1
                 decl = decl + " " + clean_lines[idx]
-            full_decls.append(decl)
+            var brace_idx = decl.find("{")
+            if brace_idx != -1:
+                full_decls.append(String(decl[byte=0:brace_idx].strip()))
+            else:
+                full_decls.append(decl)
         idx += 1
 
-    print("Parsed", len(full_decls), "RLAPI declarations from raylib.h.")
-
-    var out_file = open("src/raylib/c.mojo", "w")
+    var out_file = open(out_path, "w")
     out_file.write(
         "from std.ffi import external_call, c_int, c_float, c_char\n"
     )
@@ -226,69 +261,110 @@ def main() raises:
                     before_paren[byte = space_idx + 1 :].strip()
                 )
                 var ret_c = String(before_paren[byte=0:space_idx].strip())
-                ret_c = String(ret_c.replace("RLAPI", "").strip())
+                if macro_prefix.byte_length() > 0:
+                    ret_c = String(ret_c.replace(macro_prefix, "").strip())
+                else:
+                    ret_c = String(ret_c.replace("RLAPI", "").strip())
                 ret_c = String(ret_c.replace(" *", "*").strip())
 
                 if handle.check_symbol(func_name):
                     verified_count += 1
+                    var ret_mojo = map_c_type_to_mojo(ret_c)
 
-                var ret_mojo = map_c_type_to_mojo(ret_c)
-
-                var params_raw = String(
-                    decl[byte = paren_idx + 1 : close_paren_idx].strip()
-                )
-                var param_defs = String("")
-                var param_args = String("")
-
-                if params_raw.byte_length() > 0 and params_raw != "void":
-                    var raw_parts = params_raw.split(",")
-                    for p_i in range(len(raw_parts)):
-                        var raw_p = String(raw_parts[p_i].strip())
-                        raw_p = String(raw_p.replace("*", " * "))
-                        var p_space = raw_p.rfind(" ")
-                        if p_space != -1:
-                            var p_type_c = String(raw_p[byte=0:p_space].strip())
-                            p_type_c = String(
-                                p_type_c.replace(" *", "*").strip()
-                            )
-                            var p_name_c = String(
-                                raw_p[byte = p_space + 1 :].strip()
-                            )
-
-                            var p_type_mojo = map_c_type_to_mojo(p_type_c)
-                            var p_name_mojo = sanitize_name(p_name_c)
-
-                            if p_i > 0:
-                                param_defs = param_defs + ", "
-                                param_args = param_args + ", "
-                            param_defs = (
-                                param_defs + p_name_mojo + ": " + p_type_mojo
-                            )
-                            param_args = param_args + p_name_mojo
-
-                out_file.write("def " + func_name + "(" + param_defs + ")")
-                if ret_mojo != "NoneType":
-                    out_file.write(" -> " + ret_mojo + ":\n")
-                    out_file.write(
-                        '    return external_call["'
-                        + func_name
-                        + '", '
-                        + ret_mojo
-                        + "]("
-                        + param_args
-                        + ")\n\n"
+                    var params_raw = String(
+                        decl[byte = paren_idx + 1 : close_paren_idx].strip()
                     )
-                else:
-                    out_file.write(":\n")
-                    out_file.write(
-                        '    external_call["'
-                        + func_name
-                        + '", NoneType]('
-                        + param_args
-                        + ")\n\n"
-                    )
+                    var param_defs = String("")
+                    var param_args = String("")
+
+                    if params_raw.byte_length() > 0 and params_raw != "void":
+                        var raw_parts = params_raw.split(",")
+                        for p_i in range(len(raw_parts)):
+                            var raw_p = String(raw_parts[p_i].strip())
+                            raw_p = String(raw_p.replace("*", " * "))
+                            var p_space = raw_p.rfind(" ")
+                            if p_space != -1:
+                                var p_type_c = String(
+                                    raw_p[byte=0:p_space].strip()
+                                )
+                                p_type_c = String(
+                                    p_type_c.replace(" *", "*").strip()
+                                )
+                                var p_name_c = String(
+                                    raw_p[byte = p_space + 1 :].strip()
+                                )
+
+                                var p_type_mojo = map_c_type_to_mojo(p_type_c)
+                                var p_name_mojo = sanitize_name(p_name_c)
+
+                                if p_i > 0:
+                                    param_defs = param_defs + ", "
+                                    param_args = param_args + ", "
+                                param_defs = (
+                                    param_defs
+                                    + p_name_mojo
+                                    + ": "
+                                    + p_type_mojo
+                                )
+                                param_args = param_args + p_name_mojo
+
+                    out_file.write("def " + func_name + "(" + param_defs + ")")
+                    if ret_mojo != "NoneType":
+                        out_file.write(" -> " + ret_mojo + ":\n")
+                        out_file.write(
+                            '    return external_call["'
+                            + func_name
+                            + '", '
+                            + ret_mojo
+                            + "]("
+                            + param_args
+                            + ")\n\n"
+                        )
+                    else:
+                        out_file.write(":\n")
+                        out_file.write(
+                            '    external_call["'
+                            + func_name
+                            + '", NoneType]('
+                            + param_args
+                            + ")\n\n"
+                        )
 
     out_file.close()
+    print("Verified and generated", verified_count, "symbols in", out_path)
 
-    print("Verified in libraylib.so", verified_count, "/", len(full_decls))
-    print("Successfully generated Mojo C FFI wrappers into src/raylib/c.mojo")
+
+def main() raises:
+    print("=== Raylib Mojo Automatic Binding Generator ===")
+    var lib_path = "build/raylib/raylib/libraylib.so"
+    var handle = OwnedDLHandle(lib_path)
+    print("Loaded shared object libraylib.so.")
+
+    generate_module_bindings(
+        handle, "third_party/raylib/src/raylib.h", "src/raylib/c.mojo", "RLAPI"
+    )
+    generate_module_bindings(
+        handle,
+        "third_party/raylib/src/raymath.h",
+        "src/raylib/c_math.mojo",
+        "RMAPI",
+    )
+    generate_module_bindings(
+        handle,
+        "third_party/raylib/src/rlgl.h",
+        "src/raylib/c_rlgl.mojo",
+        "RLAPI",
+    )
+    generate_module_bindings(
+        handle,
+        "third_party/raylib/src/rcamera.h",
+        "src/raylib/c_camera.mojo",
+        "RLAPI",
+    )
+    generate_module_bindings(
+        handle,
+        "third_party/raylib/src/rgestures.h",
+        "src/raylib/c_gestures.mojo",
+        "",
+    )
+    print("All bindings generated successfully.")

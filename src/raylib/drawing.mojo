@@ -1,16 +1,27 @@
-"""2D and 3D Drawing API for Raylib in Mojo."""
+"""Drawing API for Raylib in Mojo."""
 
-from raylib.types import Vector2, Vector3, Color, Rectangle, Camera2D, Camera3D
-from raylib import c
+from raylib.types import (
+    Color,
+    Rectangle,
+    Vector2,
+    Vector3,
+    Camera2D,
+    Camera3D,
+)
+import raylib.c as c
+
+# ===-----------------------------------------------------------------------===#
+# Frame Control & Clear
+# ===-----------------------------------------------------------------------===#
 
 
 def begin_drawing():
-    """Setup canvas (framebuffer) for drawing."""
+    """Setup canvas (framebuffer) to start drawing."""
     c.BeginDrawing()
 
 
 def end_drawing():
-    """End canvas drawing and swap buffers."""
+    """End canvas drawing and swap buffers (double buffering)."""
     c.EndDrawing()
 
 
@@ -21,18 +32,21 @@ def clear_background(color: Color):
 
 def draw_fps(x: Int32, y: Int32):
     """Draw current FPS counter on screen."""
-    c.DrawFPS(x, y)
+    var fps = c.GetFPS()
+    var color = Color(0, 228, 48, 255) if fps >= 30 else Color(230, 41, 55, 255)
+    var fps_str = String(fps) + " FPS\0"
+    c.DrawText(fps_str.unsafe_ptr(), x, y, 20, color)
 
 
 def draw_text(text: String, x: Int32, y: Int32, font_size: Int32, color: Color):
     """Draw text on screen using default font."""
-    var text_buf = text
+    var text_buf = text + "\0"
     c.DrawText(text_buf.unsafe_ptr(), x, y, font_size, color)
 
 
 def measure_text(text: String, font_size: Int32) -> Int32:
     """Measure string width for default font."""
-    var text_buf = text
+    var text_buf = text + "\0"
     return c.MeasureText(text_buf.unsafe_ptr(), font_size)
 
 

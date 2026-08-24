@@ -44,7 +44,8 @@ comptime SCREEN_W = 800
 comptime SCREEN_H = 600
 comptime GRID_W = 160
 comptime GRID_H = 120
-comptime CELL_SIZE = 5 # 160x5 = 800, 120x5 = 600
+comptime CELL_SIZE = 5  # 160x5 = 800, 120x5 = 600
+
 
 def main():
     init_window(SCREEN_W, SCREEN_H, "raylib [shaders] example - game of life")
@@ -84,7 +85,9 @@ def main():
         if is_key_pressed(KEY_R):
             for y in range(GRID_H):
                 for x in range(GRID_W):
-                    grid[y * GRID_W + x] = 1 if (c.GetRandomValue(0, 100) < 25) else 0
+                    grid[y * GRID_W + x] = 1 if (
+                        c.GetRandomValue(0, 100) < 25
+                    ) else 0
 
         if is_key_pressed(KEY_C):
             for i in range(total_cells):
@@ -101,7 +104,9 @@ def main():
         # Cellular Automata Update (Conway's Rules)
         if not is_paused:
             update_timer += 1
-            if update_timer >= 2: # Update every 2 frames for smooth visual speed
+            if (
+                update_timer >= 2
+            ):  # Update every 2 frames for smooth visual speed
                 update_timer = 0
                 for y in range(GRID_H):
                     for x in range(GRID_W):
@@ -118,7 +123,9 @@ def main():
                         var idx = y * GRID_W + x
                         var current_state = Int(grid[idx])
                         if current_state == 1:
-                            next_grid[idx] = 1 if (neighbors == 2 or neighbors == 3) else 0
+                            next_grid[idx] = 1 if (
+                                neighbors == 2 or neighbors == 3
+                            ) else 0
                         else:
                             next_grid[idx] = 1 if (neighbors == 3) else 0
 
@@ -148,12 +155,21 @@ def main():
             Rectangle(0.0, 0.0, Float32(SCREEN_W), Float32(SCREEN_H)),
             Vector2(0.0, 0.0),
             0.0,
-            WHITE()
+            WHITE(),
         )
 
         # UI Info Overlay
         draw_text("CONWAY'S GAME OF LIFE", 280, 20, 20, RAYWHITE())
-        draw_text("SPACE: Pause/Play  |  R: Randomize  |  C: Clear  |  Mouse Left: Draw", 160, 50, 16, RAYWHITE())
+        draw_text(
+            (
+                "SPACE: Pause/Play  |  R: Randomize  |  C: Clear  |  Mouse"
+                " Left: Draw"
+            ),
+            160,
+            50,
+            16,
+            RAYWHITE(),
+        )
 
         if is_paused:
             draw_text("PAUSED", 360, 280, 26, RED())

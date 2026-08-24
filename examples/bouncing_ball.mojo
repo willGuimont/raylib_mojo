@@ -15,6 +15,7 @@ from raylib import (
     is_key_pressed,
     KEY_SPACE,
     Vector2,
+    raymath,
     RAYWHITE,
     LIGHTGRAY,
     DARKGRAY,
@@ -40,8 +41,7 @@ def main():
     var frame_count = 0
 
     while not window_should_close():
-        ball_position.x += ball_speed.x
-        ball_position.y += ball_speed.y
+        ball_position = raymath.vector2_add(ball_position, ball_speed)
 
         if (ball_position.x >= Float32(width) - ball_radius) or (
             ball_position.x <= ball_radius

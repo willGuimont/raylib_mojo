@@ -110,6 +110,8 @@ pixi run start
 
 Run any of the included examples using Pixi tasks:
 
+### Standard Examples
+
 | Example / Task | Command | Description |
 | :--- | :--- | :--- |
 | **Logo Generator** | `pixi run example-logo` | Generates the official raylib-mojo brand logo |
@@ -122,6 +124,15 @@ Run any of the included examples using Pixi tasks:
 | **Sprite Animation** | `pixi run example-sprite-anim` | 2D sprite sheet animation, frame clipping & speed control |
 | **Particle Assembly** | `pixi run example-particle-assembly` | Interactive 2D physics simulation with 1,200 particles & mouse forces |
 | **Game of Life** | `pixi run example-game-of-life` | Conway's Game of Life cellular automata simulation |
+
+### Mojo GPU & Compute Kernel Examples
+
+| Example / Task | Command | Description |
+| :--- | :--- | :--- |
+| **Mandelbrot & Julia Fractals** | `pixi run gpu-mandelbrot` | Per-pixel parallel compute kernel calculating 480,000 complex iterations per frame with real-time zooming & panning |
+| **N-Body Gravity Galaxy** | `pixi run gpu-nbody` | $O(N^2)$ pairwise gravitational force summation kernel evaluating 2.5+ million star interaction vectors per frame |
+| **Real-Time Sphere Raytracer** | `pixi run gpu-raytracer` | Per-pixel ray casting, sphere intersection, specular lighting, and reflection bounce compute kernel (240,000+ rays/frame) |
+| **Reaction-Diffusion PDE** | `pixi run gpu-reaction-diffusion` | 2D Gray-Scott partial differential equation kernel with 9-point Laplacian stencil convolution for dynamic organic pattern growth |
 
 ## Development & Automatic Binding Generation
 
