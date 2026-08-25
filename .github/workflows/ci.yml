@@ -27,6 +27,9 @@ jobs:
           pixi run generate-bindings
           pixi run format
 
+      - name: Run tests
+        run: pixi run test
+
       - name: Build all examples
         run: pixi run build-examples
 

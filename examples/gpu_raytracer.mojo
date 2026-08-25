@@ -40,6 +40,7 @@ from raylib import (
     Color,
     Rectangle,
     Vector2,
+    Vector3,
     KEY_R,
     KEY_S,
     MOUSE_BUTTON_LEFT,
@@ -58,69 +59,18 @@ comptime TOTAL_PIXELS = RENDER_W * RENDER_H
 comptime NUM_SPHERES = 4
 comptime dtype = DType.uint32
 
-# ===-----------------------------------------------------------------------===#
-# GPU Kernel Vector Struct with Native Mojo Operators
-# ===-----------------------------------------------------------------------===#
-
-
-struct Vec3(ImplicitlyCopyable, TrivialRegisterPassable):
-    var x: Float32
-    var y: Float32
-    var z: Float32
-
-    def __init__(
-        out self, x: Float32 = 0.0, y: Float32 = 0.0, z: Float32 = 0.0
-    ):
-        self.x = x
-        self.y = y
-        self.z = z
-
-    def dot(self, other: Self) -> Float32:
-        return self.x * other.x + self.y * other.y + self.z * other.z
-
-    def cross(self, other: Self) -> Self:
-        return Self(
-            self.y * other.z - self.z * other.y,
-            self.z * other.x - self.x * other.z,
-            self.x * other.y - self.y * other.x,
-        )
-
-    def length(self) -> Float32:
-        return sqrt(self.dot(self))
-
-    def normalize(self) -> Self:
-        var len = self.length()
-        if len > 0.0001:
-            return Self(self.x / len, self.y / len, self.z / len)
-        return Self()
-
-    def __add__(self, other: Self) -> Self:
-        return Self(self.x + other.x, self.y + other.y, self.z + other.z)
-
-    def __sub__(self, other: Self) -> Self:
-        return Self(self.x - other.x, self.y - other.y, self.z - other.z)
-
-    def __mul__(self, s: Float32) -> Self:
-        return Self(self.x * s, self.y * s, self.z * s)
-
-    def __mul__(self, other: Self) -> Self:
-        return Self(self.x * other.x, self.y * other.y, self.z * other.z)
-
-    def __neg__(self) -> Self:
-        return Self(-self.x, -self.y, -self.z)
-
 
 struct Sphere(ImplicitlyCopyable, TrivialRegisterPassable):
-    var center: Vec3
+    var center: Vector3
     var radius: Float32
-    var color: Vec3
+    var color: Vector3
     var reflectivity: Float32
 
     def __init__(
         out self,
-        center: Vec3,
+        center: Vector3,
         radius: Float32,
-        color: Vec3,
+        color: Vector3,
         reflectivity: Float32 = 0.0,
     ):
         self.center = center
@@ -132,20 +82,26 @@ struct Sphere(ImplicitlyCopyable, TrivialRegisterPassable):
 def get_sphere(idx: Int) -> Sphere:
     if idx == 0:
         # Sphere 1: Center Gold Metallic Sphere
-        return Sphere(Vec3(0.0, 0.0, 0.0), 1.0, Vec3(1.0, 0.8, 0.2), 0.75)
+        return Sphere(Vector3(0.0, 0.0, 0.0), 1.0, Vector3(1.0, 0.8, 0.2), 0.75)
     elif idx == 1:
         # Sphere 2: Left Chrome Mirror Sphere
-        return Sphere(Vec3(-2.2, -0.2, 0.5), 0.8, Vec3(0.95, 0.95, 1.0), 0.90)
+        return Sphere(
+            Vector3(-2.2, -0.2, 0.5), 0.8, Vector3(0.95, 0.95, 1.0), 0.90
+        )
     elif idx == 2:
         # Sphere 3: Right Emerald Gem Sphere
-        return Sphere(Vec3(2.2, -0.2, 0.5), 0.8, Vec3(0.1, 0.85, 0.4), 0.65)
+        return Sphere(
+            Vector3(2.2, -0.2, 0.5), 0.8, Vector3(0.1, 0.85, 0.4), 0.65
+        )
     else:
         # Sphere 4: Front Small Ruby Sphere
-        return Sphere(Vec3(0.0, -0.5, 1.8), 0.5, Vec3(0.9, 0.15, 0.2), 0.70)
+        return Sphere(
+            Vector3(0.0, -0.5, 1.8), 0.5, Vector3(0.9, 0.15, 0.2), 0.70
+        )
 
 
 def is_in_shadow(
-    shadow_orig: Vec3, shadow_dir: Vec3, light_dist: Float32
+    shadow_orig: Vector3, shadow_dir: Vector3, light_dist: Float32
 ) -> Bool:
     for s_idx in range(NUM_SPHERES):
         var sph = get_sphere(s_idx)
@@ -161,19 +117,19 @@ def is_in_shadow(
 
 
 def trace_ray_gpu(
-    ray_orig: Vec3,
-    ray_dir: Vec3,
-    light_pos: Vec3,
+    ray_orig: Vector3,
+    ray_dir: Vector3,
+    light_pos: Vector3,
     enable_reflections: Int32,
     depth: Int32 = 0,
-) -> Vec3:
+) -> Vector3:
     if depth > 2:
-        return Vec3(0.05, 0.05, 0.08)
+        return Vector3(0.05, 0.05, 0.08)
 
     var closest_t: Float32 = 1e30
-    var hit_normal = Vec3()
-    var hit_point = Vec3()
-    var hit_color = Vec3()
+    var hit_normal = Vector3()
+    var hit_point = Vector3()
+    var hit_color = Vector3()
     var hit_reflectivity: Float32 = 0.0
     var hit_anything: Bool = False
 
@@ -184,7 +140,7 @@ def trace_ray_gpu(
             closest_t = t
             hit_anything = True
             hit_point = ray_orig + ray_dir * t
-            hit_normal = Vec3(0.0, 1.0, 0.0)
+            hit_normal = Vector3(0.0, 1.0, 0.0)
             hit_reflectivity = 0.40
 
             var fx = (
@@ -196,9 +152,9 @@ def trace_ray_gpu(
                 >= 0.0 else Int(hit_point.z * 0.8) - 1
             )
             if (fx + fz) % 2 == 0:
-                hit_color = Vec3(0.85, 0.85, 0.9)
+                hit_color = Vector3(0.85, 0.85, 0.9)
             else:
-                hit_color = Vec3(0.15, 0.18, 0.22)
+                hit_color = Vector3(0.15, 0.18, 0.22)
 
     # 2. Check Sphere Intersections using Scene Loop
     for s_idx in range(NUM_SPHERES):
@@ -220,7 +176,9 @@ def trace_ray_gpu(
     if not hit_anything:
         var unit_dir = ray_dir.normalize()
         var t = 0.5 * (unit_dir.y + 1.0)
-        return Vec3(0.6, 0.7, 0.95) * (1.0 - t) + Vec3(0.15, 0.25, 0.55) * t
+        return (
+            Vector3(0.6, 0.7, 0.95) * (1.0 - t) + Vector3(0.15, 0.25, 0.55) * t
+        )
 
     # 3. Raytraced Shadows & Blinn-Phong Lighting
     var light_vec = light_pos - hit_point
@@ -242,10 +200,10 @@ def trace_ray_gpu(
             spec * spec * spec * spec * spec * spec * spec * spec
         )  # spec^8
 
-    var ambient = Vec3(0.12, 0.14, 0.18)
+    var ambient = Vector3(0.12, 0.14, 0.18)
     var shaded_color = (
         hit_color * (diff * 0.75 + 0.25)
-        + Vec3(1.0, 1.0, 1.0) * (spec_power * 0.6)
+        + Vector3(1.0, 1.0, 1.0) * (spec_power * 0.6)
         + ambient
     )
 
@@ -297,22 +255,22 @@ def raytracer_gpu_kernel(
     var cy = cos(cam_pitch_dev)
     var sy = sin(cam_pitch_dev)
 
-    var cam_orig = Vec3(
+    var cam_orig = Vector3(
         sin(cam_yaw_dev) * cy * cam_dist,
         sy * cam_dist,
         cos(cam_yaw_dev) * cy * cam_dist,
     )
-    var cam_target = Vec3(0.0, -0.1, 0.2)
+    var cam_target = Vector3(0.0, -0.1, 0.2)
 
     var forward = (cam_target - cam_orig).normalize()
     var right = forward.cross(
-        Vec3(0.0, 1.0, 0.0)
-    ).normalize() if forward.x != 0.0 or forward.z != 0.0 else Vec3(
+        Vector3(0.0, 1.0, 0.0)
+    ).normalize() if forward.x != 0.0 or forward.z != 0.0 else Vector3(
         1.0, 0.0, 0.0
     )
     var up = right.cross(forward).normalize()
 
-    var light_pos = Vec3(2.5, light_y_dev, 3.5)
+    var light_pos = Vector3(2.5, light_y_dev, 3.5)
 
     var fy = (0.5 - Float32(py) / Float32(H)) * 0.75
     var fx = (Float32(px) / Float32(W) - 0.5) * 1.0

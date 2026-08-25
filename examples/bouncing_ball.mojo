@@ -41,7 +41,7 @@ def main():
     var frame_count = 0
 
     while not window_should_close():
-        ball_position = raymath.vector2_add(ball_position, ball_speed)
+        ball_position += ball_speed
 
         if (ball_position.x >= Float32(width) - ball_radius) or (
             ball_position.x <= ball_radius

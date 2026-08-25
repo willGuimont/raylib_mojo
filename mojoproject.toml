@@ -23,6 +23,7 @@ libgl-devel = ">=1.7.0,<2"
 
 [tasks]
 format = "mojo format ."
+test = "bash -c 'for test in tests/test_*.mojo; do echo Running $test...; mojo run -I src $test || exit 1; done'"
 build-raylib = "cmake -B build/raylib -S third_party/raylib -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON && cmake --build build/raylib"
 generate-bindings = { cmd = "mojo run scripts/generate_bindings.mojo && pixi run format", depends-on = ["build-raylib"] }
 build-bindings = { cmd = "pixi run generate-bindings" }
