@@ -686,20 +686,12 @@ def MakeDirectory(dirPath: Pointer[UInt8, origin=_]) -> Int32:
     return external_call["MakeDirectory", Int32](dirPath)
 
 
-def ChangeDirectory(dirPath: Pointer[UInt8, origin=_]) -> Int32:
-    return external_call["ChangeDirectory", Int32](dirPath)
+def ChangeDirectory(dirPath: Pointer[UInt8, origin=_]) -> Bool:
+    return external_call["ChangeDirectory", Bool](dirPath)
 
 
 def IsPathFile(path: Pointer[UInt8, origin=_]) -> Bool:
     return external_call["IsPathFile", Bool](path)
-
-
-def IsPathDirectory(path: Pointer[UInt8, origin=_]) -> Bool:
-    return external_call["IsPathDirectory", Bool](path)
-
-
-def IsPathAbsolute(path: Pointer[UInt8, origin=_]) -> Bool:
-    return external_call["IsPathAbsolute", Bool](path)
 
 
 def IsFileNameValid(fileName: Pointer[UInt8, origin=_]) -> Bool:
@@ -1059,8 +1051,8 @@ def UpdateCameraPro(
     external_call["UpdateCameraPro", NoneType](camera, movement, rotation, zoom)
 
 
-def SetShapesTexture(texture: Texture, rec: Rectangle):
-    external_call["SetShapesTexture", NoneType](texture, rec)
+def SetShapesTexture(texture: Texture, source: Rectangle):
+    external_call["SetShapesTexture", NoneType](texture, source)
 
 
 def GetShapesTexture() -> Texture:
@@ -1125,161 +1117,6 @@ def DrawLineDashed(
     )
 
 
-def DrawTriangle(v1: Vector2, v2: Vector2, v3: Vector2, color: Color):
-    external_call["DrawTriangle", NoneType](v1, v2, v3, color)
-
-
-def DrawTriangleGradient(
-    v1: Vector2, v2: Vector2, v3: Vector2, c1: Color, c2: Color, c3: Color
-):
-    external_call["DrawTriangleGradient", NoneType](v1, v2, v3, c1, c2, c3)
-
-
-def DrawTriangleLines(v1: Vector2, v2: Vector2, v3: Vector2, color: Color):
-    external_call["DrawTriangleLines", NoneType](v1, v2, v3, color)
-
-
-def DrawTriangleFan(
-    points: Pointer[Vector2, origin=_], pointCount: Int32, color: Color
-):
-    external_call["DrawTriangleFan", NoneType](points, pointCount, color)
-
-
-def DrawTriangleStrip(
-    points: Pointer[Vector2, origin=_], pointCount: Int32, color: Color
-):
-    external_call["DrawTriangleStrip", NoneType](points, pointCount, color)
-
-
-def DrawRectangle(
-    posX: Int32, posY: Int32, width: Int32, height: Int32, color: Color
-):
-    external_call["DrawRectangle", NoneType](posX, posY, width, height, color)
-
-
-def DrawRectangleV(position: Vector2, size: Vector2, color: Color):
-    external_call["DrawRectangleV", NoneType](position, size, color)
-
-
-def DrawRectangleRec(rec: Rectangle, color: Color):
-    external_call["DrawRectangleRec", NoneType](rec, color)
-
-
-def DrawRectanglePro(
-    rec: Rectangle, origin: Vector2, rotation: Float32, color: Color
-):
-    external_call["DrawRectanglePro", NoneType](rec, origin, rotation, color)
-
-
-def DrawRectangleGradientV(
-    posX: Int32,
-    posY: Int32,
-    width: Int32,
-    height: Int32,
-    top: Color,
-    bottom: Color,
-):
-    external_call["DrawRectangleGradientV", NoneType](
-        posX, posY, width, height, top, bottom
-    )
-
-
-def DrawRectangleGradientH(
-    posX: Int32,
-    posY: Int32,
-    width: Int32,
-    height: Int32,
-    left: Color,
-    right: Color,
-):
-    external_call["DrawRectangleGradientH", NoneType](
-        posX, posY, width, height, left, right
-    )
-
-
-def DrawRectangleGradientEx(
-    rec: Rectangle, col1: Color, col2: Color, col3: Color, col4: Color
-):
-    external_call["DrawRectangleGradientEx", NoneType](
-        rec, col1, col2, col3, col4
-    )
-
-
-def DrawRectangleLines(
-    posX: Int32, posY: Int32, width: Int32, height: Int32, color: Color
-):
-    external_call["DrawRectangleLines", NoneType](
-        posX, posY, width, height, color
-    )
-
-
-def DrawRectangleLinesEx(rec: Rectangle, thick: Float32, color: Color):
-    external_call["DrawRectangleLinesEx", NoneType](rec, thick, color)
-
-
-def DrawRectangleRounded(
-    rec: Rectangle, roundness: Float32, segments: Int32, color: Color
-):
-    external_call["DrawRectangleRounded", NoneType](
-        rec, roundness, segments, color
-    )
-
-
-def DrawRectangleRoundedLines(
-    rec: Rectangle, roundness: Float32, segments: Int32, color: Color
-):
-    external_call["DrawRectangleRoundedLines", NoneType](
-        rec, roundness, segments, color
-    )
-
-
-def DrawRectangleRoundedLinesEx(
-    rec: Rectangle,
-    roundness: Float32,
-    segments: Int32,
-    thick: Float32,
-    color: Color,
-):
-    external_call["DrawRectangleRoundedLinesEx", NoneType](
-        rec, roundness, segments, thick, color
-    )
-
-
-def DrawPoly(
-    center: Vector2,
-    sides: Int32,
-    radius: Float32,
-    rotation: Float32,
-    color: Color,
-):
-    external_call["DrawPoly", NoneType](center, sides, radius, rotation, color)
-
-
-def DrawPolyLines(
-    center: Vector2,
-    sides: Int32,
-    radius: Float32,
-    rotation: Float32,
-    color: Color,
-):
-    external_call["DrawPolyLines", NoneType](
-        center, sides, radius, rotation, color
-    )
-
-
-def DrawPolyLinesEx(
-    center: Vector2,
-    sides: Int32,
-    radius: Float32,
-    rotation: Float32,
-    thick: Float32,
-    color: Color,
-):
-    external_call["DrawPolyLinesEx", NoneType](
-        center, sides, radius, rotation, thick, color
-    )
-
-
 def DrawCircle(centerX: Int32, centerY: Int32, radius: Float32, color: Color):
     external_call["DrawCircle", NoneType](centerX, centerY, radius, color)
 
@@ -1328,12 +1165,6 @@ def DrawCircleLines(
 
 def DrawCircleLinesV(center: Vector2, radius: Float32, color: Color):
     external_call["DrawCircleLinesV", NoneType](center, radius, color)
-
-
-def DrawCircleLinesEx(
-    center: Vector2, radius: Float32, thick: Float32, color: Color
-):
-    external_call["DrawCircleLinesEx", NoneType](center, radius, thick, color)
 
 
 def DrawEllipse(
@@ -1399,6 +1230,159 @@ def DrawRingLines(
 ):
     external_call["DrawRingLines", NoneType](
         center, innerRadius, outerRadius, startAngle, endAngle, segments, color
+    )
+
+
+def DrawRectangle(
+    posX: Int32, posY: Int32, width: Int32, height: Int32, color: Color
+):
+    external_call["DrawRectangle", NoneType](posX, posY, width, height, color)
+
+
+def DrawRectangleV(position: Vector2, size: Vector2, color: Color):
+    external_call["DrawRectangleV", NoneType](position, size, color)
+
+
+def DrawRectangleRec(rec: Rectangle, color: Color):
+    external_call["DrawRectangleRec", NoneType](rec, color)
+
+
+def DrawRectanglePro(
+    rec: Rectangle, origin: Vector2, rotation: Float32, color: Color
+):
+    external_call["DrawRectanglePro", NoneType](rec, origin, rotation, color)
+
+
+def DrawRectangleGradientV(
+    posX: Int32,
+    posY: Int32,
+    width: Int32,
+    height: Int32,
+    top: Color,
+    bottom: Color,
+):
+    external_call["DrawRectangleGradientV", NoneType](
+        posX, posY, width, height, top, bottom
+    )
+
+
+def DrawRectangleGradientH(
+    posX: Int32,
+    posY: Int32,
+    width: Int32,
+    height: Int32,
+    left: Color,
+    right: Color,
+):
+    external_call["DrawRectangleGradientH", NoneType](
+        posX, posY, width, height, left, right
+    )
+
+
+def DrawRectangleGradientEx(
+    rec: Rectangle,
+    topLeft: Color,
+    bottomLeft: Color,
+    bottomRight: Color,
+    topRight: Color,
+):
+    external_call["DrawRectangleGradientEx", NoneType](
+        rec, topLeft, bottomLeft, bottomRight, topRight
+    )
+
+
+def DrawRectangleLines(
+    posX: Int32, posY: Int32, width: Int32, height: Int32, color: Color
+):
+    external_call["DrawRectangleLines", NoneType](
+        posX, posY, width, height, color
+    )
+
+
+def DrawRectangleLinesEx(rec: Rectangle, lineThick: Float32, color: Color):
+    external_call["DrawRectangleLinesEx", NoneType](rec, lineThick, color)
+
+
+def DrawRectangleRounded(
+    rec: Rectangle, roundness: Float32, segments: Int32, color: Color
+):
+    external_call["DrawRectangleRounded", NoneType](
+        rec, roundness, segments, color
+    )
+
+
+def DrawRectangleRoundedLines(
+    rec: Rectangle, roundness: Float32, segments: Int32, color: Color
+):
+    external_call["DrawRectangleRoundedLines", NoneType](
+        rec, roundness, segments, color
+    )
+
+
+def DrawRectangleRoundedLinesEx(
+    rec: Rectangle,
+    roundness: Float32,
+    segments: Int32,
+    lineThick: Float32,
+    color: Color,
+):
+    external_call["DrawRectangleRoundedLinesEx", NoneType](
+        rec, roundness, segments, lineThick, color
+    )
+
+
+def DrawTriangle(v1: Vector2, v2: Vector2, v3: Vector2, color: Color):
+    external_call["DrawTriangle", NoneType](v1, v2, v3, color)
+
+
+def DrawTriangleLines(v1: Vector2, v2: Vector2, v3: Vector2, color: Color):
+    external_call["DrawTriangleLines", NoneType](v1, v2, v3, color)
+
+
+def DrawTriangleFan(
+    points: Pointer[Vector2, origin=_], pointCount: Int32, color: Color
+):
+    external_call["DrawTriangleFan", NoneType](points, pointCount, color)
+
+
+def DrawTriangleStrip(
+    points: Pointer[Vector2, origin=_], pointCount: Int32, color: Color
+):
+    external_call["DrawTriangleStrip", NoneType](points, pointCount, color)
+
+
+def DrawPoly(
+    center: Vector2,
+    sides: Int32,
+    radius: Float32,
+    rotation: Float32,
+    color: Color,
+):
+    external_call["DrawPoly", NoneType](center, sides, radius, rotation, color)
+
+
+def DrawPolyLines(
+    center: Vector2,
+    sides: Int32,
+    radius: Float32,
+    rotation: Float32,
+    color: Color,
+):
+    external_call["DrawPolyLines", NoneType](
+        center, sides, radius, rotation, color
+    )
+
+
+def DrawPolyLinesEx(
+    center: Vector2,
+    sides: Int32,
+    radius: Float32,
+    rotation: Float32,
+    lineThick: Float32,
+    color: Color,
+):
+    external_call["DrawPolyLinesEx", NoneType](
+        center, sides, radius, rotation, lineThick, color
     )
 
 
@@ -1526,12 +1510,10 @@ def GetSplinePointCatmullRom(
     return external_call["GetSplinePointCatmullRom", Vector2](p1, p2, p3, p4, t)
 
 
-def GetSplinePointBezierQuadratic(
+def GetSplinePointBezierQuad(
     p1: Vector2, c2: Vector2, p3: Vector2, t: Float32
 ) -> Vector2:
-    return external_call["GetSplinePointBezierQuadratic", Vector2](
-        p1, c2, p3, t
-    )
+    return external_call["GetSplinePointBezierQuad", Vector2](p1, c2, p3, t)
 
 
 def GetSplinePointBezierCubic(
@@ -1901,7 +1883,7 @@ def ImageColorGrayscale(image: Pointer[Image, origin=_]):
     external_call["ImageColorGrayscale", NoneType](image)
 
 
-def ImageColorContrast(image: Pointer[Image, origin=_], contrast: Int32):
+def ImageColorContrast(image: Pointer[Image, origin=_], contrast: Float32):
     external_call["ImageColorContrast", NoneType](image, contrast)
 
 
@@ -1988,145 +1970,6 @@ def ImageDrawLineEx(
     external_call["ImageDrawLineEx", NoneType](dst, start, end, thick, color)
 
 
-def ImageDrawLineStrip(
-    dst: Pointer[Image, origin=_],
-    points: Pointer[Vector2, origin=_],
-    pointCount: Int32,
-    color: Color,
-):
-    external_call["ImageDrawLineStrip", NoneType](
-        dst, points, pointCount, color
-    )
-
-
-def ImageDrawTriangle(
-    dst: Pointer[Image, origin=_],
-    v1: Vector2,
-    v2: Vector2,
-    v3: Vector2,
-    color: Color,
-):
-    external_call["ImageDrawTriangle", NoneType](dst, v1, v2, v3, color)
-
-
-def ImageDrawTriangleGradient(
-    dst: Pointer[Image, origin=_],
-    v1: Vector2,
-    v2: Vector2,
-    v3: Vector2,
-    c1: Color,
-    c2: Color,
-    c3: Color,
-):
-    external_call["ImageDrawTriangleGradient", NoneType](
-        dst, v1, v2, v3, c1, c2, c3
-    )
-
-
-def ImageDrawTriangleLines(
-    dst: Pointer[Image, origin=_],
-    v1: Vector2,
-    v2: Vector2,
-    v3: Vector2,
-    color: Color,
-):
-    external_call["ImageDrawTriangleLines", NoneType](dst, v1, v2, v3, color)
-
-
-def ImageDrawTriangleFan(
-    dst: Pointer[Image, origin=_],
-    points: Pointer[Vector2, origin=_],
-    pointCount: Int32,
-    color: Color,
-):
-    external_call["ImageDrawTriangleFan", NoneType](
-        dst, points, pointCount, color
-    )
-
-
-def ImageDrawTriangleStrip(
-    dst: Pointer[Image, origin=_],
-    points: Pointer[Vector2, origin=_],
-    pointCount: Int32,
-    color: Color,
-):
-    external_call["ImageDrawTriangleStrip", NoneType](
-        dst, points, pointCount, color
-    )
-
-
-def ImageDrawRectangle(
-    dst: Pointer[Image, origin=_],
-    posX: Int32,
-    posY: Int32,
-    width: Int32,
-    height: Int32,
-    color: Color,
-):
-    external_call["ImageDrawRectangle", NoneType](
-        dst, posX, posY, width, height, color
-    )
-
-
-def ImageDrawRectangleV(
-    dst: Pointer[Image, origin=_],
-    position: Vector2,
-    size: Vector2,
-    color: Color,
-):
-    external_call["ImageDrawRectangleV", NoneType](dst, position, size, color)
-
-
-def ImageDrawRectangleRec(
-    dst: Pointer[Image, origin=_], rec: Rectangle, color: Color
-):
-    external_call["ImageDrawRectangleRec", NoneType](dst, rec, color)
-
-
-def ImageDrawRectanglePro(
-    dst: Pointer[Image, origin=_],
-    rec: Rectangle,
-    origin: Vector2,
-    rotation: Float32,
-    color: Color,
-):
-    external_call["ImageDrawRectanglePro", NoneType](
-        dst, rec, origin, rotation, color
-    )
-
-
-def ImageDrawRectangleLines(
-    dst: Pointer[Image, origin=_],
-    posX: Int32,
-    posY: Int32,
-    width: Int32,
-    height: Int32,
-    color: Color,
-):
-    external_call["ImageDrawRectangleLines", NoneType](
-        dst, posX, posY, width, height, color
-    )
-
-
-def ImageDrawRectangleLinesEx(
-    dst: Pointer[Image, origin=_], rec: Rectangle, thick: Int32, color: Color
-):
-    external_call["ImageDrawRectangleLinesEx", NoneType](dst, rec, thick, color)
-
-
-def ImageDrawRectangleGradientEx(
-    dst: Pointer[Image, origin=_],
-    rec: Rectangle,
-    col1: Color,
-    col2: Color,
-    col3: Color,
-    col4: Color,
-):
-    external_call["ImageDrawRectangleGradientEx", NoneType](
-        dst, rec, col1, col2, col3, col4
-    )
-
-
 def ImageDrawCircle(
     dst: Pointer[Image, origin=_],
     centerX: Int32,
@@ -2163,65 +2006,102 @@ def ImageDrawCircleLinesV(
     external_call["ImageDrawCircleLinesV", NoneType](dst, center, radius, color)
 
 
-def ImageDrawCircleGradient(
+def ImageDrawRectangle(
     dst: Pointer[Image, origin=_],
-    center: Vector2,
-    radius: Float32,
-    inner: Color,
-    outer: Color,
-):
-    external_call["ImageDrawCircleGradient", NoneType](
-        dst, center, radius, inner, outer
-    )
-
-
-def ImageDrawImage(
-    dst: Pointer[Image, origin=_],
-    src: Image,
     posX: Int32,
     posY: Int32,
-    tint: Color,
+    width: Int32,
+    height: Int32,
+    color: Color,
 ):
-    external_call["ImageDrawImage", NoneType](dst, src, posX, posY, tint)
-
-
-def ImageDrawImageEx(
-    dst: Pointer[Image, origin=_],
-    src: Image,
-    position: Vector2,
-    rotation: Float32,
-    scale: Float32,
-    tint: Color,
-):
-    external_call["ImageDrawImageEx", NoneType](
-        dst, src, position, rotation, scale, tint
+    external_call["ImageDrawRectangle", NoneType](
+        dst, posX, posY, width, height, color
     )
 
 
-def ImageDrawImageRec(
+def ImageDrawRectangleV(
     dst: Pointer[Image, origin=_],
-    src: Image,
-    srcRec: Rectangle,
     position: Vector2,
-    tint: Color,
+    size: Vector2,
+    color: Color,
 ):
-    external_call["ImageDrawImageRec", NoneType](
-        dst, src, srcRec, position, tint
+    external_call["ImageDrawRectangleV", NoneType](dst, position, size, color)
+
+
+def ImageDrawRectangleRec(
+    dst: Pointer[Image, origin=_], rec: Rectangle, color: Color
+):
+    external_call["ImageDrawRectangleRec", NoneType](dst, rec, color)
+
+
+def ImageDrawRectangleLines(
+    dst: Pointer[Image, origin=_], rec: Rectangle, thick: Int32, color: Color
+):
+    external_call["ImageDrawRectangleLines", NoneType](dst, rec, thick, color)
+
+
+def ImageDrawTriangle(
+    dst: Pointer[Image, origin=_],
+    v1: Vector2,
+    v2: Vector2,
+    v3: Vector2,
+    color: Color,
+):
+    external_call["ImageDrawTriangle", NoneType](dst, v1, v2, v3, color)
+
+
+def ImageDrawTriangleEx(
+    dst: Pointer[Image, origin=_],
+    v1: Vector2,
+    v2: Vector2,
+    v3: Vector2,
+    c1: Color,
+    c2: Color,
+    c3: Color,
+):
+    external_call["ImageDrawTriangleEx", NoneType](dst, v1, v2, v3, c1, c2, c3)
+
+
+def ImageDrawTriangleLines(
+    dst: Pointer[Image, origin=_],
+    v1: Vector2,
+    v2: Vector2,
+    v3: Vector2,
+    color: Color,
+):
+    external_call["ImageDrawTriangleLines", NoneType](dst, v1, v2, v3, color)
+
+
+def ImageDrawTriangleFan(
+    dst: Pointer[Image, origin=_],
+    points: Pointer[Vector2, origin=_],
+    pointCount: Int32,
+    color: Color,
+):
+    external_call["ImageDrawTriangleFan", NoneType](
+        dst, points, pointCount, color
     )
 
 
-def ImageDrawImagePro(
+def ImageDrawTriangleStrip(
+    dst: Pointer[Image, origin=_],
+    points: Pointer[Vector2, origin=_],
+    pointCount: Int32,
+    color: Color,
+):
+    external_call["ImageDrawTriangleStrip", NoneType](
+        dst, points, pointCount, color
+    )
+
+
+def ImageDraw(
     dst: Pointer[Image, origin=_],
     src: Image,
     srcRec: Rectangle,
     dstRec: Rectangle,
-    origin: Vector2,
-    rotation: Float32,
     tint: Color,
 ):
-    external_call["ImageDrawImagePro", NoneType](
-        dst, src, srcRec, dstRec, origin, rotation, tint
-    )
+    external_call["ImageDraw", NoneType](dst, src, srcRec, dstRec, tint)
 
 
 def ImageDrawText(
@@ -2248,22 +2128,6 @@ def ImageDrawTextEx(
 ):
     external_call["ImageDrawTextEx", NoneType](
         dst, font, text, position, fontSize, spacing, tint
-    )
-
-
-def ImageDrawTextPro(
-    dst: Pointer[Image, origin=_],
-    font: Font,
-    text: Pointer[UInt8, origin=_],
-    position: Vector2,
-    origin: Vector2,
-    rotation: Float32,
-    fontSize: Float32,
-    spacing: Float32,
-    tint: Color,
-):
-    external_call["ImageDrawTextPro", NoneType](
-        dst, font, text, position, origin, rotation, fontSize, spacing, tint
     )
 
 
@@ -2342,34 +2206,34 @@ def DrawTextureEx(
 
 
 def DrawTextureRec(
-    texture: Texture, rec: Rectangle, position: Vector2, tint: Color
+    texture: Texture, source: Rectangle, position: Vector2, tint: Color
 ):
-    external_call["DrawTextureRec", NoneType](texture, rec, position, tint)
+    external_call["DrawTextureRec", NoneType](texture, source, position, tint)
 
 
 def DrawTexturePro(
     texture: Texture,
-    srcrec: Rectangle,
-    dstrec: Rectangle,
+    source: Rectangle,
+    dest: Rectangle,
     origin: Vector2,
     rotation: Float32,
     tint: Color,
 ):
     external_call["DrawTexturePro", NoneType](
-        texture, srcrec, dstrec, origin, rotation, tint
+        texture, source, dest, origin, rotation, tint
     )
 
 
 def DrawTextureNPatch(
     texture: Texture,
     nPatchInfo: NPatchInfo,
-    dstrec: Rectangle,
+    dest: Rectangle,
     origin: Vector2,
     rotation: Float32,
     tint: Color,
 ):
     external_call["DrawTextureNPatch", NoneType](
-        texture, nPatchInfo, dstrec, origin, rotation, tint
+        texture, nPatchInfo, dest, origin, rotation, tint
     )
 
 
@@ -2968,11 +2832,11 @@ def DrawCylinder(
     radiusTop: Float32,
     radiusBottom: Float32,
     height: Float32,
-    sides: Int32,
+    slices: Int32,
     color: Color,
 ):
     external_call["DrawCylinder", NoneType](
-        position, radiusTop, radiusBottom, height, sides, color
+        position, radiusTop, radiusBottom, height, slices, color
     )
 
 
@@ -2994,11 +2858,11 @@ def DrawCylinderWires(
     radiusTop: Float32,
     radiusBottom: Float32,
     height: Float32,
-    sides: Int32,
+    slices: Int32,
     color: Color,
 ):
     external_call["DrawCylinderWires", NoneType](
-        position, radiusTop, radiusBottom, height, sides, color
+        position, radiusTop, radiusBottom, height, slices, color
     )
 
 
@@ -3019,12 +2883,12 @@ def DrawCapsule(
     startPos: Vector3,
     endPos: Vector3,
     radius: Float32,
-    rings: Int32,
     slices: Int32,
+    rings: Int32,
     color: Color,
 ):
     external_call["DrawCapsule", NoneType](
-        startPos, endPos, radius, rings, slices, color
+        startPos, endPos, radius, slices, rings, color
     )
 
 
@@ -3032,12 +2896,12 @@ def DrawCapsuleWires(
     startPos: Vector3,
     endPos: Vector3,
     radius: Float32,
-    rings: Int32,
     slices: Int32,
+    rings: Int32,
     color: Color,
 ):
     external_call["DrawCapsuleWires", NoneType](
-        startPos, endPos, radius, rings, slices, color
+        startPos, endPos, radius, slices, rings, color
     )
 
 
@@ -3128,20 +2992,20 @@ def DrawBillboard(
 def DrawBillboardRec(
     camera: Camera3D,
     texture: Texture,
-    rec: Rectangle,
+    source: Rectangle,
     position: Vector3,
     size: Vector2,
     tint: Color,
 ):
     external_call["DrawBillboardRec", NoneType](
-        camera, texture, rec, position, size, tint
+        camera, texture, source, position, size, tint
     )
 
 
 def DrawBillboardPro(
     camera: Camera3D,
     texture: Texture,
-    rec: Rectangle,
+    source: Rectangle,
     position: Vector3,
     up: Vector3,
     size: Vector2,
@@ -3150,7 +3014,7 @@ def DrawBillboardPro(
     tint: Color,
 ):
     external_call["DrawBillboardPro", NoneType](
-        camera, texture, rec, position, up, size, origin, rotation, tint
+        camera, texture, source, position, up, size, origin, rotation, tint
     )
 
 
@@ -3431,9 +3295,9 @@ def IsSoundValid(sound: Sound) -> Bool:
 
 
 def UpdateSound(
-    sound: Sound, data: Pointer[NoneType, origin=_], frameCount: Int32
+    sound: Sound, data: Pointer[NoneType, origin=_], sampleCount: Int32
 ):
-    external_call["UpdateSound", NoneType](sound, data, frameCount)
+    external_call["UpdateSound", NoneType](sound, data, sampleCount)
 
 
 def UnloadWave(wave: Wave):

@@ -3,7 +3,7 @@
 # raylib_mojo
 
 [![CI](https://github.com/willGuimont/raylib_mojo/actions/workflows/ci.yml/badge.svg)](https://github.com/willGuimont/raylib_mojo/actions/workflows/ci.yml)
-[![raylib version](https://img.shields.io/badge/raylib-v6.1--dev-blue.svg)](https://github.com/raysan5/raylib)
+[![raylib version](https://img.shields.io/badge/raylib-v6.0-dev)](https://github.com/raysan5/raylib)
 [![mojo version](https://img.shields.io/badge/mojo-v1.0-orange.svg)](https://mojolang.org)
 [![pixi](https://img.shields.io/badge/pixi-package_manager-purple.svg)](https://pixi.sh)
 [![license](https://img.shields.io/badge/license-zlib-green.svg)](LICENSE)

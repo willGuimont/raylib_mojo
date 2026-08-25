@@ -24,7 +24,8 @@ libgl-devel = ">=1.7.0,<2"
 [tasks]
 format = "mojo format ."
 build-raylib = "cmake -B build/raylib -S third_party/raylib -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON && cmake --build build/raylib"
-generate-bindings = { cmd = "mojo run scripts/generate_bindings.mojo", depends-on = ["build-raylib"] }
+generate-bindings = { cmd = "mojo run scripts/generate_bindings.mojo && pixi run format", depends-on = ["build-raylib"] }
+build-bindings = { cmd = "pixi run generate-bindings" }
 build-examples = { cmd = "bash -c 'for example in examples/*.mojo; do echo Building $example...; mojo build -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib -o /tmp/$(basename $example .mojo) $example || exit 1; done'", depends-on = ["build-raylib"] }
 example-logo = { cmd = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/raylib_mojo_logo.mojo", depends-on = ["build-raylib"] }
 example-window = { cmd = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/basic_window.mojo", depends-on = ["build-raylib"] }
