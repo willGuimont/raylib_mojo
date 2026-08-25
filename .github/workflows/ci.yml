@@ -1,0 +1,39 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  verify-bindings:
+    name: Verify Bindings
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Pixi
+        uses: prefix-dev/setup-pixi@v0.10.1
+        with:
+          manifest-path: mojoproject.toml
+
+      - name: Generate bindings and format
+        run: |
+          pixi run generate-bindings
+          pixi run format
+
+      - name: Build all examples
+        run: pixi run build-examples
+
+      - name: Verify no changes
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Working tree is dirty after generating bindings and formatting. Run 'pixi run generate-bindings && pixi run format' locally and commit all changes."
+            git diff
+            exit 1
+          fi

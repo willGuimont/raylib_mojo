@@ -8,10 +8,12 @@ Controls:
   R: Toggle reflective bounces
 """
 
+from std.sys import has_accelerator
 from std.math import sin, cos, sqrt, min, max
 from std.memory import Pointer
 from std.gpu import thread_idx, block_idx, block_dim
 from max.gpu.host import DeviceContext
+from std.os import getenv
 from raylib import (
     init_window,
     window_should_close,
@@ -22,6 +24,8 @@ from raylib import (
     clear_background,
     draw_text,
     draw_fps,
+    measure_text,
+    take_screenshot,
     is_key_pressed,
     is_mouse_button_down,
     get_mouse_position,
@@ -37,6 +41,7 @@ from raylib import (
     Rectangle,
     Vector2,
     KEY_R,
+    KEY_S,
     MOUSE_BUTTON_LEFT,
 )
 import raylib.c as c
@@ -359,74 +364,100 @@ def main() raises:
     var light_y: Float32 = 4.0
     var enable_reflections: Int32 = 1
     var prev_mouse_pos = Vector2()
+    var frame_count: Int = 0
 
-    with DeviceContext() as ctx:
-        var out_buf = ctx.enqueue_create_buffer[dtype](TOTAL_PIXELS)
+    comptime if not has_accelerator():
+        print("No GPU accelerator detected on host system.")
+        c.UnloadTexture(tex)
+        close_window()
+        return
+    else:
+        with DeviceContext() as ctx:
+            var out_buf = ctx.enqueue_create_buffer[dtype](TOTAL_PIXELS)
 
-        while not window_should_close():
-            if is_key_pressed(KEY_R):
-                enable_reflections = 1 if enable_reflections == 0 else 0
+            while not window_should_close():
+                frame_count += 1
 
-            var mouse_pos = get_mouse_position()
-            if is_mouse_button_down(MOUSE_BUTTON_LEFT):
-                var dx = mouse_pos.x - prev_mouse_pos.x
-                var dy = mouse_pos.y - prev_mouse_pos.y
-                cam_yaw += dx * 0.008
-                cam_pitch -= dy * 0.008
-                # Clamp pitch so camera stays above horizon (0.05 rad to 1.5 rad)
-                cam_pitch = max(Float32(0.05), min(Float32(1.5), cam_pitch))
-            prev_mouse_pos = mouse_pos
+                if is_key_pressed(KEY_R):
+                    enable_reflections = 1 if enable_reflections == 0 else 0
 
-            # Dispatch Mojo GPU Raytracing Kernel across CUDA threads
-            ctx.enqueue_function[raytracer_gpu_kernel](
-                out_buf,
-                Int32(RENDER_W),
-                Int32(RENDER_H),
-                cam_yaw,
-                cam_pitch,
-                light_y,
-                enable_reflections,
-                grid_dim=(GRID_X, GRID_Y),
-                block_dim=(BLOCK_X, BLOCK_Y),
-            )
-            ctx.synchronize()
+                if is_key_pressed(KEY_S):
+                    take_screenshot("media/gpu_raytracer.png")
 
-            # Read back GPU buffer to Raylib Texture
-            with out_buf.map_to_host() as host_buf:
-                c.UpdateTexture(
-                    tex, host_buf.unsafe_ptr().unsafe_bitcast[NoneType]()
+                var mouse_pos = get_mouse_position()
+                if is_mouse_button_down(MOUSE_BUTTON_LEFT):
+                    var dx = mouse_pos.x - prev_mouse_pos.x
+                    var dy = mouse_pos.y - prev_mouse_pos.y
+                    cam_yaw += dx * 0.008
+                    cam_pitch -= dy * 0.008
+                    # Clamp pitch so camera stays above horizon (0.05 rad to 1.5 rad)
+                    cam_pitch = max(Float32(0.05), min(Float32(1.5), cam_pitch))
+                prev_mouse_pos = mouse_pos
+
+                # Dispatch Mojo GPU Raytracing Kernel across CUDA threads
+                ctx.enqueue_function[raytracer_gpu_kernel](
+                    out_buf,
+                    Int32(RENDER_W),
+                    Int32(RENDER_H),
+                    cam_yaw,
+                    cam_pitch,
+                    light_y,
+                    enable_reflections,
+                    grid_dim=(GRID_X, GRID_Y),
+                    block_dim=(BLOCK_X, BLOCK_Y),
+                )
+                ctx.synchronize()
+
+                # Read back GPU buffer to Raylib Texture
+                with out_buf.map_to_host() as host_buf:
+                    c.UpdateTexture(
+                        tex, host_buf.unsafe_ptr().unsafe_bitcast[NoneType]()
+                    )
+
+                # Render Scaled Texture & UI
+                begin_drawing()
+                clear_background(BLACK())
+
+                c.DrawTexturePro(
+                    tex,
+                    Rectangle(0.0, 0.0, Float32(RENDER_W), Float32(RENDER_H)),
+                    Rectangle(0.0, 0.0, Float32(SCREEN_W), Float32(SCREEN_H)),
+                    Vector2(0.0, 0.0),
+                    0.0,
+                    WHITE(),
                 )
 
-            # Render Scaled Texture & UI
-            begin_drawing()
-            clear_background(BLACK())
+                # Light semi-transparent UI overlay for crisp text readability
+                c.DrawRectangle(0, 0, SCREEN_W, 75, Color(245, 245, 245, 220))
 
-            c.DrawTexturePro(
-                tex,
-                Rectangle(0.0, 0.0, Float32(RENDER_W), Float32(RENDER_H)),
-                Rectangle(0.0, 0.0, Float32(SCREEN_W), Float32(SCREEN_H)),
-                Vector2(0.0, 0.0),
-                0.0,
-                WHITE(),
-            )
+                var title = "REAL-TIME SPHERE RAYTRACING GPU KERNEL"
+                var title_x = (SCREEN_W - measure_text(title, 20)) // 2
+                draw_text(
+                    title,
+                    title_x,
+                    14,
+                    20,
+                    BLACK(),
+                )
 
-            draw_text(
-                "REAL-TIME SPHERE RAYTRACING GPU KERNEL",
-                220,
-                20,
-                20,
-                RAYWHITE(),
-            )
-            draw_text(
-                "LEFT MOUSE DRAG: 3D Orbit Camera  |  R: Toggle Reflections",
-                170,
-                50,
-                16,
-                RAYWHITE(),
-            )
+                var subtitle = (
+                    "LEFT MOUSE DRAG: 3D Orbit Camera  |  R: Toggle Reflections"
+                )
+                var sub_x = (SCREEN_W - measure_text(subtitle, 16)) // 2
+                draw_text(
+                    subtitle,
+                    sub_x,
+                    44,
+                    16,
+                    BLACK(),
+                )
 
-            draw_fps(10, 10)
-            end_drawing()
+                draw_fps(10, 12)
+                end_drawing()
 
-    c.UnloadTexture(tex)
-    close_window()
+                if frame_count >= 10 and getenv("SAVE_SCREENSHOT") == "1":
+                    take_screenshot("media/gpu_raytracer.png")
+                    break
+
+        c.UnloadTexture(tex)
+        close_window()

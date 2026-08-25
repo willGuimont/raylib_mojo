@@ -10,10 +10,12 @@ Controls:
   UP / DOWN: Change max iterations (64..2048)
 """
 
+from std.sys import has_accelerator
 from std.math import sin, cos, min, max
 from std.memory import Pointer
 from std.gpu import thread_idx, block_idx, block_dim
 from max.gpu.host import DeviceContext
+from std.os import getenv
 from raylib import (
     init_window,
     window_should_close,
@@ -23,7 +25,9 @@ from raylib import (
     end_drawing,
     clear_background,
     draw_text,
+    measure_text,
     draw_fps,
+    take_screenshot,
     is_key_pressed,
     is_key_down,
     is_mouse_button_down,
@@ -40,6 +44,7 @@ from raylib import (
     Vector2,
     KEY_J,
     KEY_R,
+    KEY_S,
     KEY_UP,
     KEY_DOWN,
     MOUSE_BUTTON_LEFT,
@@ -146,111 +151,108 @@ def main() raises:
     var max_iter: Int32 = 128
     var is_julia: Int32 = 0
     var prev_mouse_pos = Vector2()
+    var frame_count: Int = 0
 
-    # Initialize MAX GPU DeviceContext & VRAM Buffer
-    with DeviceContext() as ctx:
-        var out_buf = ctx.enqueue_create_buffer[dtype](TOTAL_PIXELS)
+    # Check GPU availability at compile time
+    comptime if not has_accelerator():
+        print("No GPU accelerator detected on host system.")
+        c.UnloadTexture(tex)
+        close_window()
+        return
+    else:
+        # Initialize MAX GPU DeviceContext & VRAM Buffer
+        with DeviceContext() as ctx:
+            var out_buf = ctx.enqueue_create_buffer[dtype](TOTAL_PIXELS)
 
-        while not window_should_close():
-            # Handle Controls
-            if is_key_pressed(KEY_J):
-                is_julia = 1 if is_julia == 0 else 0
+            while not window_should_close():
+                frame_count += 1
 
-            if is_key_pressed(KEY_R):
-                center_x = -0.5
-                center_y = 0.0
-                zoom = 1.0
-                max_iter = 128
-                is_julia = 0
+                # Handle Controls
+                if is_key_pressed(KEY_J):
+                    is_julia = 1 if is_julia == 0 else 0
 
-            if is_key_down(KEY_UP):
-                max_iter = min(Int32(2048), max_iter + 8)
-            if is_key_down(KEY_DOWN):
-                max_iter = max(Int32(32), max_iter - 8)
+                if is_key_pressed(KEY_S):
+                    take_screenshot("media/gpu_mandelbrot.png")
 
-            # Mouse Zoom
-            var wheel = get_mouse_wheel_move()
-            if wheel != 0.0:
-                var zoom_factor: Float64 = 1.25 if wheel > 0.0 else 0.8
-                zoom *= zoom_factor
+                if is_key_pressed(KEY_R):
+                    center_x = -0.5
+                    center_y = 0.0
+                    zoom = 1.0
+                    max_iter = 128
+                    is_julia = 0
 
-            # Mouse Drag Pan
-            var mouse_pos = get_mouse_position()
-            if is_mouse_button_down(MOUSE_BUTTON_LEFT):
-                var dx = Float64(mouse_pos.x - prev_mouse_pos.x)
-                var dy = Float64(mouse_pos.y - prev_mouse_pos.y)
-                center_x -= dx * (3.0 / (Float64(SCREEN_W) * zoom))
-                center_y -= dy * (2.25 / (Float64(SCREEN_H) * zoom))
-            prev_mouse_pos = mouse_pos
+                if is_key_down(KEY_UP):
+                    max_iter = min(Int32(2048), max_iter + 8)
+                if is_key_down(KEY_DOWN):
+                    max_iter = max(Int32(32), max_iter - 8)
 
-            # Dispatch Mojo GPU Kernel onto GPU
-            ctx.enqueue_function[mandelbrot_gpu_kernel](
-                out_buf,
-                Int32(SCREEN_W),
-                Int32(SCREEN_H),
-                center_x,
-                center_y,
-                zoom,
-                max_iter,
-                is_julia,
-                grid_dim=(GRID_X, GRID_Y),
-                block_dim=(BLOCK_X, BLOCK_Y),
-            )
-            ctx.synchronize()
+                # Mouse Zoom
+                var wheel = get_mouse_wheel_move()
+                if wheel != 0.0:
+                    var zoom_factor: Float64 = 1.25 if wheel > 0.0 else 0.8
+                    zoom *= zoom_factor
 
-            # Read back GPU buffer to Raylib Texture
-            with out_buf.map_to_host() as host_buf:
-                c.UpdateTexture(
-                    tex, host_buf.unsafe_ptr().unsafe_bitcast[NoneType]()
+                # Mouse Drag Pan
+                var mouse_pos = get_mouse_position()
+                if is_mouse_button_down(MOUSE_BUTTON_LEFT):
+                    var dx = Float64(mouse_pos.x - prev_mouse_pos.x)
+                    var dy = Float64(mouse_pos.y - prev_mouse_pos.y)
+                    center_x -= dx * (3.0 / (Float64(SCREEN_W) * zoom))
+                    center_y -= dy * (2.25 / (Float64(SCREEN_H) * zoom))
+                prev_mouse_pos = mouse_pos
+
+                # Dispatch Mojo GPU Kernel onto GPU
+                ctx.enqueue_function[mandelbrot_gpu_kernel](
+                    out_buf,
+                    Int32(SCREEN_W),
+                    Int32(SCREEN_H),
+                    center_x,
+                    center_y,
+                    zoom,
+                    max_iter,
+                    is_julia,
+                    grid_dim=(GRID_X, GRID_Y),
+                    block_dim=(BLOCK_X, BLOCK_Y),
                 )
+                ctx.synchronize()
 
-            # Render Texture & UI Header
-            begin_drawing()
-            clear_background(BLACK())
+                # Read back GPU buffer to Raylib Texture
+                with out_buf.map_to_host() as host_buf:
+                    c.UpdateTexture(
+                        tex, host_buf.unsafe_ptr().unsafe_bitcast[NoneType]()
+                    )
 
-            c.DrawTexture(tex, 0, 0, WHITE())
+                # Render Texture & UI Header
+                begin_drawing()
+                clear_background(BLACK())
 
-            # Light semi-transparent UI overlays for crisp BLACK text readability
-            c.DrawRectangle(0, 0, SCREEN_W, 45, Color(245, 245, 245, 220))
-            c.DrawRectangle(0, 520, SCREEN_W, 80, Color(245, 245, 245, 220))
+                c.DrawTexture(tex, 0, 0, WHITE())
 
-            var mode_title = (
-                "JULIA FRACTAL GPU KERNEL (Float64)" if is_julia
-                == 1 else "MANDELBROT FRACTAL GPU KERNEL (Float64)"
-            )
-            draw_text(mode_title, 20, 12, 20, BLACK())
+                # Light semi-transparent UI overlay for crisp BLACK text readability
+                c.DrawRectangle(0, 0, SCREEN_W, 75, Color(245, 245, 245, 220))
 
-            # UI Instructions & Info at the bottom of the screen (in BLACK)
-            draw_text(
-                "WHEEL: Zoom  |  LEFT DRAG: Pan  |  J: Toggle Mode",
-                20,
-                528,
-                15,
-                BLACK(),
-            )
-            draw_text(
-                "R: Reset View  |  UP/DOWN: Max Iterations ("
-                + String(max_iter)
-                + ")",
-                20,
-                548,
-                15,
-                BLACK(),
-            )
-            draw_text(
-                "GPU Accelerator: MAX DeviceContext (CUDA Grid: "
-                + String(GRID_X)
-                + "x"
-                + String(GRID_Y)
-                + ")",
-                20,
-                570,
-                15,
-                BLACK(),
-            )
+                var mode_title = (
+                    "JULIA FRACTAL GPU KERNEL (Float64)" if is_julia
+                    == 1 else "MANDELBROT FRACTAL GPU KERNEL (Float64)"
+                )
+                var title_x = (SCREEN_W - measure_text(mode_title, 20)) // 2
+                draw_text(mode_title, title_x, 14, 20, BLACK())
 
-            draw_fps(SCREEN_W - 100, 12)
-            end_drawing()
+                var inst = (
+                    "WHEEL: Zoom  |  LEFT DRAG: Pan  |  J: Mode  |  R: Reset  |"
+                    "  UP/DOWN: Iter ("
+                    + String(max_iter)
+                    + ")"
+                )
+                var inst_x = (SCREEN_W - measure_text(inst, 16)) // 2
+                draw_text(inst, inst_x, 44, 16, BLACK())
 
-    c.UnloadTexture(tex)
-    close_window()
+                draw_fps(10, 12)
+                end_drawing()
+
+                if frame_count >= 10 and getenv("SAVE_SCREENSHOT") == "1":
+                    take_screenshot("media/gpu_mandelbrot.png")
+                    break
+
+        c.UnloadTexture(tex)
+        close_window()

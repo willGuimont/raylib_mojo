@@ -7,10 +7,12 @@ Controls:
   G: Toggle super-gravity mode
 """
 
+from std.sys import has_accelerator
 from std.math import sin, cos, sqrt
 from std.memory import Pointer
 from std.gpu import thread_idx, block_idx, block_dim
 from max.gpu.host import DeviceContext
+from std.os import getenv
 from raylib import (
     init_window,
     window_should_close,
@@ -23,6 +25,7 @@ from raylib import (
     measure_text,
     draw_fps,
     draw_circle_v,
+    take_screenshot,
     is_key_pressed,
     BLACK,
     RAYWHITE,
@@ -38,6 +41,7 @@ from raylib import (
     Vector2,
     KEY_SPACE,
     KEY_G,
+    KEY_S,
 )
 import raylib.c as c
 
@@ -184,162 +188,194 @@ def main() raises:
     var gravity_scale: Float32 = 1.0
     var dt: Float32 = 0.016
 
-    with DeviceContext() as ctx:
-        # Create GPU Buffers for N-Body Positions, Velocities, and Mass
-        var px_buf1 = ctx.enqueue_create_buffer[dtype](NUM_BODIES)
-        var py_buf1 = ctx.enqueue_create_buffer[dtype](NUM_BODIES)
-        var vx_buf1 = ctx.enqueue_create_buffer[dtype](NUM_BODIES)
-        var vy_buf1 = ctx.enqueue_create_buffer[dtype](NUM_BODIES)
+    comptime if not has_accelerator():
+        print("No GPU accelerator detected on host system.")
+        close_window()
+        return
+    else:
+        with DeviceContext() as ctx:
+            # Create GPU Buffers for N-Body Positions, Velocities, and Mass
+            var px_buf1 = ctx.enqueue_create_buffer[dtype](NUM_BODIES)
+            var py_buf1 = ctx.enqueue_create_buffer[dtype](NUM_BODIES)
+            var vx_buf1 = ctx.enqueue_create_buffer[dtype](NUM_BODIES)
+            var vy_buf1 = ctx.enqueue_create_buffer[dtype](NUM_BODIES)
 
-        var px_buf2 = ctx.enqueue_create_buffer[dtype](NUM_BODIES)
-        var py_buf2 = ctx.enqueue_create_buffer[dtype](NUM_BODIES)
-        var vx_buf2 = ctx.enqueue_create_buffer[dtype](NUM_BODIES)
-        var vy_buf2 = ctx.enqueue_create_buffer[dtype](NUM_BODIES)
+            var px_buf2 = ctx.enqueue_create_buffer[dtype](NUM_BODIES)
+            var py_buf2 = ctx.enqueue_create_buffer[dtype](NUM_BODIES)
+            var vx_buf2 = ctx.enqueue_create_buffer[dtype](NUM_BODIES)
+            var vy_buf2 = ctx.enqueue_create_buffer[dtype](NUM_BODIES)
 
-        var mass_buf = ctx.enqueue_create_buffer[dtype](NUM_BODIES)
+            var mass_buf = ctx.enqueue_create_buffer[dtype](NUM_BODIES)
 
-        var center_x = Float32(SCREEN_W / 2)
-        var center_y = Float32(SCREEN_H / 2)
+            var center_x = Float32(SCREEN_W / 2)
+            var center_y = Float32(SCREEN_H / 2)
 
-        with px_buf1.map_to_host() as px_h, py_buf1.map_to_host() as py_h, vx_buf1.map_to_host() as vx_h, vy_buf1.map_to_host() as vy_h, mass_buf.map_to_host() as m_h:
-            px_h[0] = center_x
-            py_h[0] = center_y
-            vx_h[0] = 0.0
-            vy_h[0] = 0.0
-            m_h[0] = 50000.0
+            with px_buf1.map_to_host() as px_h, py_buf1.map_to_host() as py_h, vx_buf1.map_to_host() as vx_h, vy_buf1.map_to_host() as vy_h, mass_buf.map_to_host() as m_h:
+                px_h[0] = center_x
+                py_h[0] = center_y
+                vx_h[0] = 0.0
+                vy_h[0] = 0.0
+                m_h[0] = 50000.0
 
-            for i in range(1, NUM_BODIES):
-                var arm = Float32(i % 3)
-                var dist = Float32(
-                    20.0 + (Float32(i) / Float32(NUM_BODIES)) * 260.0
-                )
-                var angle = (
-                    arm * 2.094395
-                    + (dist * 0.03)
-                    + (Float32(c.GetRandomValue(-10, 10)) * 0.01)
-                )
-
-                px_h[i] = center_x + cos(angle) * dist
-                py_h[i] = center_y + sin(angle) * dist
-
-                var orbit_speed = sqrt(Float32(1.0) * 50000.0 / dist) * 0.95
-                vx_h[i] = -sin(angle) * orbit_speed
-                vy_h[i] = cos(angle) * orbit_speed
-                m_h[i] = Float32(c.GetRandomValue(5, 20))
-
-        var flip: Bool = False
-
-        while not window_should_close():
-            # Controls
-            if is_key_pressed(KEY_SPACE):
-                with px_buf1.map_to_host() as px_h, py_buf1.map_to_host() as py_h, vx_buf1.map_to_host() as vx_h, vy_buf1.map_to_host() as vy_h, mass_buf.map_to_host() as m_h:
-                    px_h[0] = center_x
-                    py_h[0] = center_y
-                    vx_h[0] = 0.0
-                    vy_h[0] = 0.0
-                    m_h[0] = 50000.0
-
-                    for i in range(1, NUM_BODIES):
-                        var arm = Float32(i % 3)
-                        var dist = Float32(
-                            20.0 + (Float32(i) / Float32(NUM_BODIES)) * 260.0
-                        )
-                        var angle = (
-                            arm * 2.094395
-                            + (dist * 0.03)
-                            + (Float32(c.GetRandomValue(-10, 10)) * 0.01)
-                        )
-
-                        px_h[i] = center_x + cos(angle) * dist
-                        py_h[i] = center_y + sin(angle) * dist
-
-                        var orbit_speed = (
-                            sqrt(Float32(1.0) * 50000.0 / dist) * 0.95
-                        )
-                        vx_h[i] = -sin(angle) * orbit_speed
-                        vy_h[i] = cos(angle) * orbit_speed
-                        m_h[i] = Float32(c.GetRandomValue(5, 20))
-
-            if is_key_pressed(KEY_G):
-                gravity_scale = 3.0 if gravity_scale == 1.0 else 1.0
-
-            # Dispatch Mojo GPU Kernel to compute N^2 forces
-            if not flip:
-                ctx.enqueue_function[nbody_gpu_kernel](
-                    px_buf2,
-                    py_buf2,
-                    vx_buf2,
-                    vy_buf2,
-                    px_buf1,
-                    py_buf1,
-                    vx_buf1,
-                    vy_buf1,
-                    mass_buf,
-                    Int32(NUM_BODIES),
-                    gravity_scale,
-                    dt,
-                    grid_dim=BLOCKS_PER_GRID,
-                    block_dim=THREADS_PER_BLOCK,
-                )
-            else:
-                ctx.enqueue_function[nbody_gpu_kernel](
-                    px_buf1,
-                    py_buf1,
-                    vx_buf1,
-                    vy_buf1,
-                    px_buf2,
-                    py_buf2,
-                    vx_buf2,
-                    vy_buf2,
-                    mass_buf,
-                    Int32(NUM_BODIES),
-                    gravity_scale,
-                    dt,
-                    grid_dim=BLOCKS_PER_GRID,
-                    block_dim=THREADS_PER_BLOCK,
-                )
-
-            ctx.synchronize()
-
-            # Render GPU Body Positions
-            var cur_px = px_buf2 if not flip else px_buf1
-            var cur_py = py_buf2 if not flip else py_buf1
-            var cur_vx = vx_buf2 if not flip else vx_buf1
-            var cur_vy = vy_buf2 if not flip else vy_buf1
-
-            begin_drawing()
-            clear_background(BLACK())
-
-            with cur_px.map_to_host() as px_h, cur_py.map_to_host() as py_h, cur_vx.map_to_host() as vx_h, cur_vy.map_to_host() as vy_h:
-                # Black Hole
-                draw_circle_v(Vector2(px_h[0], py_h[0]), 10.0, PURPLE())
-                draw_circle_v(Vector2(px_h[0], py_h[0]), 6.0, WHITE())
-
-                # Stars
                 for i in range(1, NUM_BODIES):
-                    var vx_val = vx_h[i]
-                    var vy_val = vy_h[i]
-                    var speed = sqrt(vx_val * vx_val + vy_val * vy_val)
-                    draw_circle_v(
-                        Vector2(px_h[i], py_h[i]), 2.0, body_color(speed)
+                    var arm = Float32(i % 3)
+                    var dist = Float32(
+                        20.0 + (Float32(i) / Float32(NUM_BODIES)) * 260.0
+                    )
+                    var angle = (
+                        arm * 2.094395
+                        + (dist * 0.03)
+                        + (Float32(c.GetRandomValue(-10, 10)) * 0.01)
                     )
 
-            # UI Header & Controls (Dynamically Centered)
-            var title = "N-BODY GRAVITATIONAL GALAXY GPU KERNEL"
-            var title_x = (SCREEN_W - measure_text(title, 20)) // 2
-            draw_text(title, title_x, 20, 20, RAYWHITE())
+                    px_h[i] = center_x + cos(angle) * dist
+                    py_h[i] = center_y + sin(angle) * dist
 
-            var inst = (
-                "SPACE: Reset Galaxy  |  G: Gravity Mult ("
-                + String(Int(gravity_scale))
-                + "x)"
-            )
-            var inst_x = (SCREEN_W - measure_text(inst, 16)) // 2
-            draw_text(inst, inst_x, 50, 16, RAYWHITE())
+                    var orbit_speed = sqrt(Float32(1.0) * 50000.0 / dist) * 0.95
+                    vx_h[i] = -sin(angle) * orbit_speed
+                    vy_h[i] = cos(angle) * orbit_speed
+                    m_h[i] = Float32(c.GetRandomValue(5, 20))
 
-            draw_fps(10, 10)
-            end_drawing()
+            var flip: Bool = False
+            var frame_count: Int = 0
 
-            flip = not flip
+            while not window_should_close():
+                frame_count += 1
 
-    close_window()
+                # Controls
+                if is_key_pressed(KEY_SPACE):
+                    with px_buf1.map_to_host() as px_h, py_buf1.map_to_host() as py_h, vx_buf1.map_to_host() as vx_h, vy_buf1.map_to_host() as vy_h, mass_buf.map_to_host() as m_h:
+                        px_h[0] = center_x
+                        py_h[0] = center_y
+                        vx_h[0] = 0.0
+                        vy_h[0] = 0.0
+                        m_h[0] = 50000.0
+
+                        for i in range(1, NUM_BODIES):
+                            var arm = Float32(i % 3)
+                            var dist = Float32(
+                                20.0
+                                + (Float32(i) / Float32(NUM_BODIES)) * 260.0
+                            )
+                            var angle = (
+                                arm * 2.094395
+                                + (dist * 0.03)
+                                + (Float32(c.GetRandomValue(-10, 10)) * 0.01)
+                            )
+
+                            px_h[i] = center_x + cos(angle) * dist
+                            py_h[i] = center_y + sin(angle) * dist
+
+                            var orbit_speed = (
+                                sqrt(Float32(1.0) * 50000.0 / dist) * 0.95
+                            )
+                            vx_h[i] = -sin(angle) * orbit_speed
+                            vy_h[i] = cos(angle) * orbit_speed
+                            m_h[i] = Float32(c.GetRandomValue(5, 20))
+
+                if is_key_pressed(KEY_G):
+                    gravity_scale = 3.0 if gravity_scale == 1.0 else 1.0
+
+                if is_key_pressed(KEY_S):
+                    take_screenshot("media/gpu_nbody.png")
+
+                # Dispatch Mojo GPU Kernel to compute N^2 forces
+                if not flip:
+                    ctx.enqueue_function[nbody_gpu_kernel](
+                        px_buf2,
+                        py_buf2,
+                        vx_buf2,
+                        vy_buf2,
+                        px_buf1,
+                        py_buf1,
+                        vx_buf1,
+                        vy_buf1,
+                        mass_buf,
+                        Int32(NUM_BODIES),
+                        gravity_scale,
+                        dt,
+                        grid_dim=BLOCKS_PER_GRID,
+                        block_dim=THREADS_PER_BLOCK,
+                    )
+                else:
+                    ctx.enqueue_function[nbody_gpu_kernel](
+                        px_buf1,
+                        py_buf1,
+                        vx_buf1,
+                        vy_buf1,
+                        px_buf2,
+                        py_buf2,
+                        vx_buf2,
+                        vy_buf2,
+                        mass_buf,
+                        Int32(NUM_BODIES),
+                        gravity_scale,
+                        dt,
+                        grid_dim=BLOCKS_PER_GRID,
+                        block_dim=THREADS_PER_BLOCK,
+                    )
+
+                ctx.synchronize()
+
+                # Render GPU Body Positions
+                var cur_px = px_buf2 if not flip else px_buf1
+                var cur_py = py_buf2 if not flip else py_buf1
+                var cur_vx = vx_buf2 if not flip else vx_buf1
+                var cur_vy = vy_buf2 if not flip else vy_buf1
+
+                begin_drawing()
+                clear_background(BLACK())
+
+                with cur_px.map_to_host() as px_h, cur_py.map_to_host() as py_h, cur_vx.map_to_host() as vx_h, cur_vy.map_to_host() as vy_h:
+                    # Black Hole
+                    draw_circle_v(Vector2(px_h[0], py_h[0]), 10.0, PURPLE())
+                    draw_circle_v(Vector2(px_h[0], py_h[0]), 6.0, WHITE())
+
+                    # Stars
+                    for i in range(1, NUM_BODIES):
+                        var vx_val = vx_h[i]
+                        var vy_val = vy_h[i]
+                        var speed = sqrt(vx_val * vx_val + vy_val * vy_val)
+                        draw_circle_v(
+                            Vector2(px_h[i], py_h[i]), 2.0, body_color(speed)
+                        )
+
+                # Light semi-transparent UI overlay for crisp text readability
+                c.DrawRectangle(0, 0, SCREEN_W, 75, Color(245, 245, 245, 220))
+
+                # UI Header & Controls (Dynamically Centered)
+                var title = "N-BODY GRAVITATIONAL GALAXY GPU KERNEL"
+                var title_x = (SCREEN_W - measure_text(title, 20)) // 2
+                draw_text(title, title_x, 14, 20, BLACK())
+
+                var inst = (
+                    "SPACE: Reset Galaxy  |  G: Gravity Mult ("
+                    + String(Int(gravity_scale))
+                    + "x)"
+                )
+                var inst_x = (SCREEN_W - measure_text(inst, 16)) // 2
+                draw_text(inst, inst_x, 44, 16, BLACK())
+
+                draw_fps(10, 12)
+                end_drawing()
+
+                if getenv("SAVE_GIF") == "1":
+                    if frame_count <= 1200:
+                        if frame_count % 2 == 0:
+                            var frame_num = frame_count // 2
+                            var frame_str = String(frame_num)
+                            if frame_num < 10:
+                                frame_str = "000" + frame_str
+                            elif frame_num < 100:
+                                frame_str = "00" + frame_str
+                            elif frame_num < 1000:
+                                frame_str = "0" + frame_str
+                            take_screenshot(
+                                "/tmp/nbody_frames/frame_" + frame_str + ".png"
+                            )
+                    else:
+                        break
+
+                flip = not flip
+
+        close_window()

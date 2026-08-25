@@ -8,10 +8,12 @@ Controls:
   P: Cycle parameter presets (Solitons, Coral, Mitosis)
 """
 
+from std.sys import has_accelerator
 from std.math import min, max
 from std.memory import Pointer
 from std.gpu import thread_idx, block_idx, block_dim
 from max.gpu.host import DeviceContext
+from std.os import getenv
 from raylib import (
     init_window,
     window_should_close,
@@ -22,6 +24,8 @@ from raylib import (
     clear_background,
     draw_text,
     draw_fps,
+    measure_text,
+    take_screenshot,
     is_key_pressed,
     is_mouse_button_down,
     get_mouse_position,
@@ -36,6 +40,7 @@ from raylib import (
     Vector2,
     KEY_SPACE,
     KEY_P,
+    KEY_S,
     MOUSE_BUTTON_LEFT,
 )
 import raylib.c as c
@@ -160,146 +165,185 @@ def main() raises:
     var preset_idx: Int = 0
     var flip: Bool = False
 
-    with DeviceContext() as ctx:
-        var u_buf1 = ctx.enqueue_create_buffer[float_dtype](TOTAL_CELLS)
-        var v_buf1 = ctx.enqueue_create_buffer[float_dtype](TOTAL_CELLS)
-        var u_buf2 = ctx.enqueue_create_buffer[float_dtype](TOTAL_CELLS)
-        var v_buf2 = ctx.enqueue_create_buffer[float_dtype](TOTAL_CELLS)
-        var pix_buf = ctx.enqueue_create_buffer[uint_dtype](TOTAL_CELLS)
+    comptime if not has_accelerator():
+        print("No GPU accelerator detected on host system.")
+        c.UnloadTexture(tex)
+        close_window()
+        return
+    else:
+        with DeviceContext() as ctx:
+            var u_buf1 = ctx.enqueue_create_buffer[float_dtype](TOTAL_CELLS)
+            var v_buf1 = ctx.enqueue_create_buffer[float_dtype](TOTAL_CELLS)
+            var u_buf2 = ctx.enqueue_create_buffer[float_dtype](TOTAL_CELLS)
+            var v_buf2 = ctx.enqueue_create_buffer[float_dtype](TOTAL_CELLS)
+            var pix_buf = ctx.enqueue_create_buffer[uint_dtype](TOTAL_CELLS)
 
-        # Initialize chemical concentrations: U = 1.0 everywhere, V = 1.0 in center square
-        var mid_x = GRID_W // 2
-        var mid_y = GRID_H // 2
+            # Initialize chemical concentrations: U = 1.0 everywhere, V = 1.0 in center square
+            var mid_x = GRID_W // 2
+            var mid_y = GRID_H // 2
 
-        with u_buf1.map_to_host() as u_h, v_buf1.map_to_host() as v_h:
-            for i in range(TOTAL_CELLS):
-                u_h[i] = 1.0
-                v_h[i] = 0.0
+            with u_buf1.map_to_host() as u_h, v_buf1.map_to_host() as v_h:
+                for i in range(TOTAL_CELLS):
+                    u_h[i] = 1.0
+                    v_h[i] = 0.0
 
-            for y in range(mid_y - 12, mid_y + 12):
-                for x in range(mid_x - 12, mid_x + 12):
-                    var idx = y * GRID_W + x
-                    v_h[idx] = 1.0
+                for y in range(mid_y - 12, mid_y + 12):
+                    for x in range(mid_x - 12, mid_x + 12):
+                        var idx = y * GRID_W + x
+                        v_h[idx] = 1.0
 
-        while not window_should_close():
-            if is_key_pressed(KEY_SPACE):
-                with u_buf1.map_to_host() as u_h, v_buf1.map_to_host() as v_h:
-                    for i in range(TOTAL_CELLS):
-                        u_h[i] = 1.0
-                        v_h[i] = 0.0
+            var frame_count: Int = 0
 
-                    for y in range(mid_y - 12, mid_y + 12):
-                        for x in range(mid_x - 12, mid_x + 12):
-                            var idx = y * GRID_W + x
-                            v_h[idx] = 1.0
+            while not window_should_close():
+                frame_count += 1
 
-            if is_key_pressed(KEY_P):
-                preset_idx = (preset_idx + 1) % 3
-                if preset_idx == 0:
-                    F = 0.0545
-                    k = 0.062
-                elif preset_idx == 1:
-                    F = 0.0367
-                    k = 0.0649
-                else:
-                    F = 0.030
-                    k = 0.062
+                if is_key_pressed(KEY_SPACE):
+                    with u_buf1.map_to_host() as u_h, v_buf1.map_to_host() as v_h:
+                        for i in range(TOTAL_CELLS):
+                            u_h[i] = 1.0
+                            v_h[i] = 0.0
 
-                with u_buf1.map_to_host() as u_h, v_buf1.map_to_host() as v_h:
-                    for i in range(TOTAL_CELLS):
-                        u_h[i] = 1.0
-                        v_h[i] = 0.0
+                        for y in range(mid_y - 12, mid_y + 12):
+                            for x in range(mid_x - 12, mid_x + 12):
+                                var idx = y * GRID_W + x
+                                v_h[idx] = 1.0
 
-                    for y in range(mid_y - 12, mid_y + 12):
-                        for x in range(mid_x - 12, mid_x + 12):
-                            var idx = y * GRID_W + x
-                            v_h[idx] = 1.0
+                if is_key_pressed(KEY_P):
+                    preset_idx = (preset_idx + 1) % 3
+                    if preset_idx == 0:
+                        F = 0.0545
+                        k = 0.062
+                    elif preset_idx == 1:
+                        F = 0.0367
+                        k = 0.0649
+                    else:
+                        F = 0.030
+                        k = 0.062
 
-            # Mouse Injection
-            if is_mouse_button_down(MOUSE_BUTTON_LEFT):
-                var mpos = get_mouse_position()
-                var gx = Int(mpos.x / 4.0)
-                var gy = Int(mpos.y / 4.0)
+                    with u_buf1.map_to_host() as u_h, v_buf1.map_to_host() as v_h:
+                        for i in range(TOTAL_CELLS):
+                            u_h[i] = 1.0
+                            v_h[i] = 0.0
 
-                var cur_v = v_buf1 if not flip else v_buf2
-                with cur_v.map_to_host() as v_h:
-                    for dy in range(-6, 7):
-                        for dx in range(-6, 7):
-                            var nx = gx + dx
-                            var ny = gy + dy
-                            if (
-                                nx >= 0
-                                and nx < GRID_W
-                                and ny >= 0
-                                and ny < GRID_H
-                            ):
-                                v_h[ny * GRID_W + nx] = 1.0
+                        for y in range(mid_y - 12, mid_y + 12):
+                            for x in range(mid_x - 12, mid_x + 12):
+                                var idx = y * GRID_W + x
+                                v_h[idx] = 1.0
 
-            # Dispatch 4 GPU Sub-steps per frame
-            for _sub in range(4):
-                var in_u = u_buf1 if not flip else u_buf2
-                var in_v = v_buf1 if not flip else v_buf2
-                var out_u = u_buf2 if not flip else u_buf1
-                var out_v = v_buf2 if not flip else v_buf1
+                if is_key_pressed(KEY_S):
+                    take_screenshot("media/gpu_reaction_diffusion.png")
 
-                ctx.enqueue_function[reaction_diffusion_gpu_kernel](
-                    out_u,
-                    out_v,
-                    pix_buf,
-                    in_u,
-                    in_v,
-                    Int32(GRID_W),
-                    Int32(GRID_H),
-                    Du,
-                    Dv,
-                    F,
-                    k,
-                    grid_dim=(GRID_X, GRID_Y),
-                    block_dim=(BLOCK_X, BLOCK_Y),
+                # Mouse Injection
+                if is_mouse_button_down(MOUSE_BUTTON_LEFT):
+                    var mpos = get_mouse_position()
+                    var gx = Int(mpos.x / 4.0)
+                    var gy = Int(mpos.y / 4.0)
+
+                    var cur_v = v_buf1 if not flip else v_buf2
+                    with cur_v.map_to_host() as v_h:
+                        for dy in range(-6, 7):
+                            for dx in range(-6, 7):
+                                var nx = gx + dx
+                                var ny = gy + dy
+                                if (
+                                    nx >= 0
+                                    and nx < GRID_W
+                                    and ny >= 0
+                                    and ny < GRID_H
+                                ):
+                                    v_h[ny * GRID_W + nx] = 1.0
+
+                # Dispatch 4 GPU Sub-steps per frame
+                for _sub in range(4):
+                    var in_u = u_buf1 if not flip else u_buf2
+                    var in_v = v_buf1 if not flip else v_buf2
+                    var out_u = u_buf2 if not flip else u_buf1
+                    var out_v = v_buf2 if not flip else v_buf1
+
+                    ctx.enqueue_function[reaction_diffusion_gpu_kernel](
+                        out_u,
+                        out_v,
+                        pix_buf,
+                        in_u,
+                        in_v,
+                        Int32(GRID_W),
+                        Int32(GRID_H),
+                        Du,
+                        Dv,
+                        F,
+                        k,
+                        grid_dim=(GRID_X, GRID_Y),
+                        block_dim=(BLOCK_X, BLOCK_Y),
+                    )
+                    flip = not flip
+
+                ctx.synchronize()
+
+                # Read back pixel buffer to Raylib Texture
+                with pix_buf.map_to_host() as host_buf:
+                    c.UpdateTexture(
+                        tex, host_buf.unsafe_ptr().unsafe_bitcast[NoneType]()
+                    )
+
+                # Render Texture & UI Overlay
+                begin_drawing()
+                clear_background(BLACK())
+
+                c.DrawTexturePro(
+                    tex,
+                    Rectangle(0.0, 0.0, Float32(GRID_W), Float32(GRID_H)),
+                    Rectangle(0.0, 0.0, Float32(SCREEN_W), Float32(SCREEN_H)),
+                    Vector2(0.0, 0.0),
+                    0.0,
+                    WHITE(),
                 )
-                flip = not flip
 
-            ctx.synchronize()
+                # Light semi-transparent UI overlay for crisp text readability
+                c.DrawRectangle(0, 0, SCREEN_W, 75, Color(245, 245, 245, 220))
 
-            # Read back pixel buffer to Raylib Texture
-            with pix_buf.map_to_host() as host_buf:
-                c.UpdateTexture(
-                    tex, host_buf.unsafe_ptr().unsafe_bitcast[NoneType]()
+                var title = "GRAY-SCOTT REACTION-DIFFUSION GPU KERNEL"
+                var title_x = (SCREEN_W - measure_text(title, 20)) // 2
+                draw_text(
+                    title,
+                    title_x,
+                    14,
+                    20,
+                    BLACK(),
                 )
 
-            # Render Texture & UI Overlay
-            begin_drawing()
-            clear_background(BLACK())
-
-            c.DrawTexturePro(
-                tex,
-                Rectangle(0.0, 0.0, Float32(GRID_W), Float32(GRID_H)),
-                Rectangle(0.0, 0.0, Float32(SCREEN_W), Float32(SCREEN_H)),
-                Vector2(0.0, 0.0),
-                0.0,
-                WHITE(),
-            )
-
-            draw_text(
-                "GRAY-SCOTT REACTION-DIFFUSION GPU KERNEL",
-                200,
-                20,
-                20,
-                RAYWHITE(),
-            )
-            draw_text(
-                (
+                var subtitle = (
                     "MOUSE LEFT DRAG: Inject Chemical  |  SPACE: Reset  |  P:"
                     " Switch Preset"
-                ),
-                150,
-                50,
-                16,
-                RAYWHITE(),
-            )
+                )
+                var sub_x = (SCREEN_W - measure_text(subtitle, 16)) // 2
+                draw_text(
+                    subtitle,
+                    sub_x,
+                    44,
+                    16,
+                    BLACK(),
+                )
 
-            draw_fps(10, 10)
-            end_drawing()
+                draw_fps(10, 12)
+                end_drawing()
 
-    c.UnloadTexture(tex)
-    close_window()
+                if getenv("SAVE_GIF") == "1":
+                    if frame_count <= 1800:
+                        if frame_count % 2 == 0:
+                            var frame_num = frame_count // 2
+                            var frame_str = String(frame_num)
+                            if frame_num < 10:
+                                frame_str = "000" + frame_str
+                            elif frame_num < 100:
+                                frame_str = "00" + frame_str
+                            elif frame_num < 1000:
+                                frame_str = "0" + frame_str
+                            take_screenshot(
+                                "/tmp/rd_frames/frame_" + frame_str + ".png"
+                            )
+                    else:
+                        break
+
+        c.UnloadTexture(tex)
+        close_window()
+        _ = flip
