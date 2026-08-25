@@ -146,6 +146,9 @@ def reaction_diffusion_gpu_kernel(
 
 
 def main() raises:
+    if getenv("SAVE_GIF") == "1":
+        c.SetTraceLogLevel(7)
+
     init_window(
         SCREEN_W,
         SCREEN_H,
@@ -328,19 +331,13 @@ def main() raises:
                 end_drawing()
 
                 if getenv("SAVE_GIF") == "1":
-                    if frame_count <= 1800:
-                        if frame_count % 2 == 0:
-                            var frame_num = frame_count // 2
-                            var frame_str = String(frame_num)
-                            if frame_num < 10:
-                                frame_str = "000" + frame_str
-                            elif frame_num < 100:
-                                frame_str = "00" + frame_str
-                            elif frame_num < 1000:
-                                frame_str = "0" + frame_str
-                            take_screenshot(
-                                "/tmp/rd_frames/frame_" + frame_str + ".png"
-                            )
+                    if frame_count <= 2400:
+                        var frame_str = String(frame_count)
+                        while frame_str.byte_length() < 6:
+                            frame_str = "0" + frame_str
+                        take_screenshot(
+                            "/tmp/rd_frames/frame_" + frame_str + ".png"
+                        )
                     else:
                         break
 
