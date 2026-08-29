@@ -49,36 +49,52 @@ All build dependencies and the Mojo environment are automatically managed by [Pi
 pixi --version
 ```
 
-### Building Raylib
+### Building
 
-Clone the repository with submodules and build the shared dynamic library:
+Clone the repository with submodules and install the environment:
 
 ```bash
-git clone --recursive https://github.com/willGuimont/mojo_raylib.git
-cd mojo_raylib
+git clone --recursive https://github.com/willGuimont/raylib_mojo.git
+cd raylib_mojo
 
-# Build raylib shared library
-pixi run build-raylib
+# Builds the vendored raylib into the environment
+pixi install
 ```
+
+`pixi install` compiles `third_party/raylib` through the [`shim/`](shim) package
+and installs `libraylib.so` into the environment, so there is no separate build
+step to remember.
 
 ---
 
 ## How to Use `raylib_mojo` in Your Projects
 
-You can use `raylib_mojo` in your own Mojo + Pixi projects in two simple steps:
+`raylib_mojo` is published on [mojoshelf](https://mojoshelf.org/tins/raylib_mojo)
+as a "tin". You can use it in your own Mojo + Pixi project in three steps.
 
-### 1. Add `raylib_mojo` as a Git Submodule
+### 1. Add `raylib_mojo` to Your Project
 
-In your project repository root, add `raylib_mojo` as a submodule:
+With the [shelf](https://mojoshelf.org/getting-started) extension, which vendors
+the tin at the revision the registry has pinned:
 
 ```bash
-git submodule add https://github.com/willGuimont/mojo_raylib third_party/raylib_mojo
+pixi global install --channel https://mojoshelf.org/channel mojoshelf
+shelf add raylib_mojo
+git submodule update --init --recursive   # raylib itself
+```
+
+Or as a plain git submodule:
+
+```bash
+git submodule add https://github.com/willGuimont/raylib_mojo third_party/raylib_mojo
 git submodule update --init --recursive
 ```
 
 ### 2. Configure `pixi.toml` / `mojoproject.toml`
 
-Configure your project configuration file to include build tools and dependencies. Specify `depends-on = ["build-raylib"]` on your application task so running your app automatically builds `libraylib.so` first:
+Depend on the `shim` package that ships with `raylib_mojo`. Pixi builds raylib
+and installs `libraylib.so` into your environment, so there is no `build-raylib`
+task to copy into your manifest and no build ordering to get right:
 
 ```toml
 [workspace]
@@ -86,29 +102,30 @@ name = "my_mojo_game"
 version = "0.1.0"
 channels = ["conda-forge", "https://conda.modular.com/max"]
 platforms = ["linux-64"]
+preview = ["pixi-build"]
 
 [dependencies]
 max = ">=26.5.0"
 mojo = ">=1.0.0"
-cmake = "*"
-ninja = "*"
-make = "*"
+# Builds third_party/raylib into the environment. The X11/GL packages raylib
+# needs come along transitively — you do not list them yourself.
+raylib-shim = { path = "third_party/raylib_mojo/shim" }
 
 [tasks]
-# Build raylib shared C library
-build-raylib = "cmake -B third_party/raylib_mojo/build/raylib -S third_party/raylib_mojo/third_party/raylib -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON && cmake --build third_party/raylib_mojo/build/raylib"
-
-# Run your Mojo main application (depends on build-raylib task)
-start = { cmd = "mojo run -I third_party/raylib_mojo/src -Xlinker -Lthird_party/raylib_mojo/build/raylib/raylib -Xlinker -rpath -Xlinker third_party/raylib_mojo/build/raylib/raylib -Xlinker -lraylib main.mojo", depends-on = ["build-raylib"] }
+start = "mojo run -I third_party/raylib_mojo/src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib main.mojo"
 ```
 
-### 3. Build & Run Your Project
+`libraylib.so` lives in the environment, so the linker needs `-L$CONDA_PREFIX/lib`;
+Mojo already adds that directory to the binary's rpath, so no `-rpath` flag and no
+repository-relative build path are needed.
 
-Simply execute your task, Pixi will automatically compile `libraylib.so` if needed and launch your Mojo application:
+### 3. Build & Run Your Project
 
 ```bash
 pixi run start
 ```
+
+Pixi builds raylib on first install, then launches your Mojo application.
 
 ---
 
@@ -163,7 +180,7 @@ Run any of the included examples using Pixi tasks:
 To regenerate the bindings:
 
 ```bash
-# Automatically builds libraylib.so and regenerates bindings into src/raylib/
+# Regenerates bindings into src/raylib/ against the environment's libraylib.so
 pixi run generate-bindings
 ```
 

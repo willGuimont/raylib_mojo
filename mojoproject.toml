@@ -5,40 +5,32 @@ description = "Mojo bindings for raylib"
 authors = ["Will Guimont <willguimont@gmail.com>"]
 channels = ["conda-forge", "https://conda.modular.com/max"]
 platforms = ["linux-64"]
+preview = ["pixi-build"]
 
 [dependencies]
 max = ">=26.5.0"
 mojo = ">=1.0.0"
-cmake = "*"
-ninja = "*"
-make = "*"
-xorg-libx11 = ">=1.8.13,<2"
-xorg-libxrandr = ">=1.5.5,<2"
-xorg-libxinerama = ">=1.1.6,<2"
-xorg-libxcursor = ">=1.2.3,<2"
-xorg-libxi = ">=1.8.3,<2"
-xorg-libxext = ">=1.3.7,<2"
-xorg-xorgproto = ">=2025.1,<2026"
-libgl-devel = ">=1.7.0,<2"
+# raylib itself: pixi builds third_party/raylib via shim/ and installs
+# libraylib.so into the environment. No manual cmake step.
+raylib-shim = { path = "shim" }
 
 [tasks]
 format = "mojo format ."
 test = "bash -c 'for test in tests/test_*.mojo; do echo Running $test...; mojo run -I src $test || exit 1; done'"
-build-raylib = "cmake -B build/raylib -S third_party/raylib -DBUILD_EXAMPLES=OFF -DBUILD_SHARED_LIBS=ON && cmake --build build/raylib"
-generate-bindings = { cmd = "mojo run scripts/generate_bindings.mojo && pixi run format", depends-on = ["build-raylib"] }
+generate-bindings = "mojo run scripts/generate_bindings.mojo && pixi run format"
 build-bindings = { cmd = "pixi run generate-bindings" }
-build-examples = { cmd = "bash -c 'for example in examples/*.mojo; do echo Building $example...; mojo build -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib -o /tmp/$(basename $example .mojo) $example || exit 1; done'", depends-on = ["build-raylib"] }
-example-logo = { cmd = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/raylib_mojo_logo.mojo", depends-on = ["build-raylib"] }
-example-window = { cmd = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/basic_window.mojo", depends-on = ["build-raylib"] }
-example-bouncing-ball = { cmd = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/bouncing_ball.mojo", depends-on = ["build-raylib"] }
-example-collision = { cmd = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/shapes_collision_2d.mojo", depends-on = ["build-raylib"] }
-example-camera-2d = { cmd = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/core_2d_camera.mojo", depends-on = ["build-raylib"] }
-example-3d = { cmd = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/core_3d.mojo", depends-on = ["build-raylib"] }
-example-audio-stream = { cmd = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/audio_raw_stream.mojo", depends-on = ["build-raylib"] }
-example-sprite-anim = { cmd = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/textures_sprite_animation.mojo", depends-on = ["build-raylib"] }
-example-particle-assembly = { cmd = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/particle_assembly.mojo", depends-on = ["build-raylib"] }
-example-game-of-life = { cmd = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/shaders_game_of_life.mojo", depends-on = ["build-raylib"] }
-gpu-mandelbrot = { cmd = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/gpu_mandelbrot.mojo", depends-on = ["build-raylib"] }
-gpu-nbody = { cmd = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/gpu_nbody.mojo", depends-on = ["build-raylib"] }
-gpu-raytracer = { cmd = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/gpu_raytracer.mojo", depends-on = ["build-raylib"] }
-gpu-reaction-diffusion = { cmd = "mojo run -I src -Xlinker -Lbuild/raylib/raylib -Xlinker -rpath -Xlinker build/raylib/raylib -Xlinker -lraylib examples/gpu_reaction_diffusion.mojo", depends-on = ["build-raylib"] }
+build-examples = "bash -c 'for example in examples/*.mojo; do echo Building $example...; mojo build -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib -o /tmp/$(basename $example .mojo) $example || exit 1; done'"
+example-logo = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/raylib_mojo_logo.mojo" }
+example-window = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/basic_window.mojo" }
+example-bouncing-ball = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/bouncing_ball.mojo" }
+example-collision = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/shapes_collision_2d.mojo" }
+example-camera-2d = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/core_2d_camera.mojo" }
+example-3d = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/core_3d.mojo" }
+example-audio-stream = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/audio_raw_stream.mojo" }
+example-sprite-anim = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/textures_sprite_animation.mojo" }
+example-particle-assembly = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/particle_assembly.mojo" }
+example-game-of-life = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/shaders_game_of_life.mojo" }
+gpu-mandelbrot = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/gpu_mandelbrot.mojo" }
+gpu-nbody = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/gpu_nbody.mojo" }
+gpu-raytracer = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/gpu_raytracer.mojo" }
+gpu-reaction-diffusion = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/gpu_reaction_diffusion.mojo" }
