@@ -7,7 +7,6 @@ description = "Builds the vendored raylib C library into the pixi environment as
 backend = { name = "pixi-build-cmake", version = "*" }
 
 [package.build.config]
-# raylib itself lives in the workspace submodule, one level up from this package.
 extra-input-globs = ["../third_party/raylib/**/*"]
 
 [package.build-dependencies]
@@ -15,9 +14,6 @@ cmake = "*"
 ninja = "*"
 make = "*"
 
-# X11/GL are what raylib links against on Linux. Declaring them here means a
-# consumer that depends on raylib_mojo gets them transitively — they never have
-# to list xorg packages in their own manifest.
 [package.target.linux-64.host-dependencies]
 xorg-libx11 = ">=1.8.13,<2"
 xorg-libxrandr = ">=1.5.5,<2"

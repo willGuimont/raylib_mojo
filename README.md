@@ -61,26 +61,23 @@ cd raylib_mojo
 pixi install
 ```
 
-`pixi install` compiles `third_party/raylib` through the [`shim/`](shim) package
-and installs `libraylib.so` into the environment, so there is no separate build
-step to remember.
+`pixi install` compiles `third_party/raylib` through the [`shim/`](shim) package and installs `libraylib.so` into the environment.
 
 ---
 
 ## How to Use `raylib_mojo` in Your Projects
 
-`raylib_mojo` is published on [mojoshelf](https://mojoshelf.org/tins/raylib_mojo)
-as a "tin". You can use it in your own Mojo + Pixi project in three steps.
+`raylib_mojo` is published on [mojoshelf](https://mojoshelf.org/tins/raylib_mojo) as a "tin".
+You can use it in your own Mojo + Pixi project in three steps.
 
 ### 1. Add `raylib_mojo` to Your Project
 
-With the [shelf](https://mojoshelf.org/getting-started) extension, which vendors
-the tin at the revision the registry has pinned:
+With the [shelf](https://mojoshelf.org/getting-started) extension, which vendors the tin at the revision the registry has pinned:
 
 ```bash
 pixi global install --channel https://mojoshelf.org/channel mojoshelf
 shelf add raylib_mojo
-git submodule update --init --recursive   # raylib itself
+git submodule update --init --recursive   # required to pull raylib itself as a submodule
 ```
 
 Or as a plain git submodule:
@@ -93,8 +90,7 @@ git submodule update --init --recursive
 ### 2. Configure `pixi.toml` / `mojoproject.toml`
 
 Depend on the `shim` package that ships with `raylib_mojo`. Pixi builds raylib
-and installs `libraylib.so` into your environment, so there is no `build-raylib`
-task to copy into your manifest and no build ordering to get right:
+and installs `libraylib.so` into your environment:
 
 ```toml
 [workspace]
@@ -107,17 +103,14 @@ preview = ["pixi-build"]
 [dependencies]
 max = ">=26.5.0"
 mojo = ">=1.0.0"
-# Builds third_party/raylib into the environment. The X11/GL packages raylib
-# needs come along transitively — you do not list them yourself.
+# Builds third_party/raylib into the environment.
 raylib-shim = { path = "third_party/raylib_mojo/shim" }
 
 [tasks]
 start = "mojo run -I third_party/raylib_mojo/src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib main.mojo"
 ```
 
-`libraylib.so` lives in the environment, so the linker needs `-L$CONDA_PREFIX/lib`;
-Mojo already adds that directory to the binary's rpath, so no `-rpath` flag and no
-repository-relative build path are needed.
+`libraylib.so` lives in the environment, so the linker needs `-L$CONDA_PREFIX/lib`.
 
 ### 3. Build & Run Your Project
 
@@ -173,7 +166,9 @@ Run any of the included examples using Pixi tasks:
 
 ---
 
-## Development & Automatic Binding Generation
+## Development
+
+### Automatic Binding Generation
 
 `raylib_mojo` includes a pure Mojo automatic binding generator script ([scripts/generate_bindings.mojo](scripts/generate_bindings.mojo)) that parses Raylib's C declarations from `raylib.h`, `raymath.h`, `rlgl.h`, `rcamera.h`, and `rgestures.h`, maps C types to Mojo types, and verifies each symbol dynamically against `libraylib.so`.
 
@@ -182,6 +177,13 @@ To regenerate the bindings:
 ```bash
 # Regenerates bindings into src/raylib/ against the environment's libraylib.so
 pixi run generate-bindings
+```
+
+### Publish on [mojoshelf](https://mojoshelf.org/tins/raylib_mojo)
+
+```bash
+# Once pushed to master, run
+shelf publish
 ```
 
 ---

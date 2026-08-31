@@ -1,6 +1,5 @@
 # Thin wrapper so pixi can build the vendored raylib as a package: `pixi install`
-# compiles third_party/raylib and installs libraylib into the environment's lib/,
-# replacing the manual `pixi run build-raylib` step.
+# compiles third_party/raylib and installs libraylib into the environment's lib/
 cmake_minimum_required(VERSION 3.16)
 project(raylib_shim C)
 

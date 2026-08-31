@@ -10,8 +10,6 @@ preview = ["pixi-build"]
 [dependencies]
 max = ">=26.5.0"
 mojo = ">=1.0.0"
-# raylib itself: pixi builds third_party/raylib via shim/ and installs
-# libraylib.so into the environment. No manual cmake step.
 raylib-shim = { path = "shim" }
 
 [tasks]
