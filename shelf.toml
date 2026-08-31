@@ -1,0 +1,6 @@
+name = "raylib_mojo"
+version = "0.1.0"
+description = "Mojo bindings for raylib, a simple and easy-to-use library to enjoy videogames programming"
+tags = ["raylib", "graphics", "gamedev", "bindings"]
+# other tins this one depends on; omit if none
+tins = []

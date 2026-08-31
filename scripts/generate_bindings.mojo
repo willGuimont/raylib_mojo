@@ -1,4 +1,6 @@
 from std.ffi import OwnedDLHandle
+from std.os import getenv
+from std.os.path import exists
 
 
 def map_c_type_to_mojo(c_type_str: String) -> String:
@@ -334,9 +336,24 @@ def generate_module_bindings(
     print("Verified and generated", verified_count, "symbols in", out_path)
 
 
+def raylib_shared_lib() -> String:
+    """Locates libraylib.so.
+
+    pixi builds the shim package into the environment, so the library normally
+    lives in $CONDA_PREFIX/lib. Falls back to the in-tree cmake output for
+    anyone building raylib by hand.
+    """
+    var prefix = getenv("CONDA_PREFIX")
+    if prefix:
+        var installed = prefix + "/lib/libraylib.so"
+        if exists(installed):
+            return installed
+    return "build/raylib/raylib/libraylib.so"
+
+
 def main() raises:
     print("=== Raylib Mojo Automatic Binding Generator ===")
-    var lib_path = "build/raylib/raylib/libraylib.so"
+    var lib_path = raylib_shared_lib()
     var handle = OwnedDLHandle(lib_path)
     print("Loaded shared object libraylib.so.")
 
