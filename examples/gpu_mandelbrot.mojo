@@ -60,10 +60,6 @@ comptime GRID_Y = (SCREEN_H + BLOCK_Y - 1) // BLOCK_Y
 comptime TOTAL_PIXELS = SCREEN_W * SCREEN_H
 comptime dtype = DType.uint32
 
-# ===-----------------------------------------------------------------------===#
-# GPU Kernel Definition (Executed on GPU threads with Float64 high precision)
-# ===-----------------------------------------------------------------------===#
-
 
 def mandelbrot_gpu_kernel(
     output: Pointer[Scalar[dtype], MutAnyOrigin],

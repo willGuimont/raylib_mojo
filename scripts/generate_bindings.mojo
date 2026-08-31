@@ -92,10 +92,12 @@ def map_c_type_to_mojo(c_type_str: String) -> String:
         return String(c_type)
 
     if c_type.endswith("**"):
-        return "Pointer[Pointer[UInt8, origin=_], origin=_]"
+        return "Pointer[Pointer[UInt8, origin=ImmutAnyOrigin], origin=_]"
     if c_type.endswith("*"):
         var inner = String(c_type[byte = 0 : c_type.byte_length() - 1].strip())
         var inner_mojo = map_c_type_to_mojo(inner)
+        if inner_mojo.startswith("Pointer["):
+            return inner_mojo
         if (
             inner_mojo == "Int8"
             or inner_mojo == "UInt8"
@@ -221,9 +223,11 @@ def generate_module_bindings(
         "from std.ffi import external_call, c_int, c_float, c_char\n"
     )
     out_file.write("from std.memory import Pointer\n")
+    out_file.write("from std.origin import ImmutAnyOrigin\n")
     out_file.write("from raylib.types import (\n")
     out_file.write(
-        "    Vector2,\n    Vector3,\n    Vector4,\n    Color,\n    Rectangle,\n"
+        "    Vector2,\n    Vector3,\n    Vector4,\n    Quaternion,\n   "
+        " Matrix,\n    Color,\n    Rectangle,\n"
     )
     out_file.write(
         "    Camera2D,\n    Camera3D,\n    Image,\n    Texture,\n   "
@@ -250,19 +254,21 @@ def generate_module_bindings(
     out_file.write(")\n\n")
 
     var verified_count = 0
-    for i in range(len(full_decls)):
-        var decl = full_decls[i]
+    for decl_idx in range(len(full_decls)):
+        var decl = String(full_decls[decl_idx])
         var paren_idx = decl.find("(")
         var close_paren_idx = decl.rfind(")")
+
         if paren_idx != -1 and close_paren_idx != -1:
-            var before_paren = String(decl[byte=0:paren_idx].strip())
-            before_paren = String(before_paren.replace("*", " * "))
-            var space_idx = before_paren.rfind(" ")
-            if space_idx != -1:
-                var func_name = String(
-                    before_paren[byte = space_idx + 1 :].strip()
-                )
-                var ret_c = String(before_paren[byte=0:space_idx].strip())
+            var prefix = String(decl[byte=0:paren_idx].strip())
+            prefix = String(prefix.replace("RLAPI", "").strip())
+            prefix = String(prefix.replace("*", " * "))
+
+            var last_space = prefix.rfind(" ")
+            if last_space != -1:
+                var ret_c = String(prefix[byte=0:last_space].strip())
+                var func_name = String(prefix[byte = last_space + 1 :].strip())
+
                 if macro_prefix.byte_length() > 0:
                     ret_c = String(ret_c.replace(macro_prefix, "").strip())
                 else:
@@ -272,6 +278,9 @@ def generate_module_bindings(
                 if handle.check_symbol(func_name):
                     verified_count += 1
                     var ret_mojo = map_c_type_to_mojo(ret_c)
+                    ret_mojo = String(
+                        ret_mojo.replace("origin=_", "origin=ImmutAnyOrigin")
+                    )
 
                     var params_raw = String(
                         decl[byte = paren_idx + 1 : close_paren_idx].strip()

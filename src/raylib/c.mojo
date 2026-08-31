@@ -1,9 +1,12 @@
 from std.ffi import external_call, c_int, c_float, c_char
 from std.memory import Pointer
+from std.origin import ImmutAnyOrigin
 from raylib.types import (
     Vector2,
     Vector3,
     Vector4,
+    Quaternion,
+    Matrix,
     Color,
     Rectangle,
     Camera2D,
@@ -149,8 +152,10 @@ def SetWindowFocused():
     external_call["SetWindowFocused", NoneType]()
 
 
-def GetWindowHandle() -> Pointer[NoneType, origin=_]:
-    return external_call["GetWindowHandle", Pointer[NoneType, origin=_]]()
+def GetWindowHandle() -> Pointer[NoneType, origin=ImmutAnyOrigin]:
+    return external_call[
+        "GetWindowHandle", Pointer[NoneType, origin=ImmutAnyOrigin]
+    ]()
 
 
 def GetScreenWidth() -> Int32:
@@ -209,16 +214,20 @@ def GetWindowScaleDPI() -> Vector2:
     return external_call["GetWindowScaleDPI", Vector2]()
 
 
-def GetMonitorName(monitor: Int32) -> Pointer[UInt8, origin=_]:
-    return external_call["GetMonitorName", Pointer[UInt8, origin=_]](monitor)
+def GetMonitorName(monitor: Int32) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "GetMonitorName", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ](monitor)
 
 
 def SetClipboardText(text: Pointer[UInt8, origin=_]):
     external_call["SetClipboardText", NoneType](text)
 
 
-def GetClipboardText() -> Pointer[UInt8, origin=_]:
-    return external_call["GetClipboardText", Pointer[UInt8, origin=_]]()
+def GetClipboardText() -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "GetClipboardText", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ]()
 
 
 def GetClipboardImage() -> Image:
@@ -474,10 +483,10 @@ def GetRandomValue(min: Int32, max: Int32) -> Int32:
 
 def LoadRandomSequence(
     count: UInt32, min: Int32, max: Int32
-) -> Pointer[Int32, origin=_]:
-    return external_call["LoadRandomSequence", Pointer[Int32, origin=_]](
-        count, min, max
-    )
+) -> Pointer[Int32, origin=ImmutAnyOrigin]:
+    return external_call[
+        "LoadRandomSequence", Pointer[Int32, origin=ImmutAnyOrigin]
+    ](count, min, max)
 
 
 def UnloadRandomSequence(sequence: Pointer[Int32, origin=_]):
@@ -508,14 +517,18 @@ def SetTraceLogCallback(callback: Pointer[NoneType, origin=_]):
     external_call["SetTraceLogCallback", NoneType](callback)
 
 
-def MemAlloc(size: UInt32) -> Pointer[NoneType, origin=_]:
-    return external_call["MemAlloc", Pointer[NoneType, origin=_]](size)
+def MemAlloc(size: UInt32) -> Pointer[NoneType, origin=ImmutAnyOrigin]:
+    return external_call["MemAlloc", Pointer[NoneType, origin=ImmutAnyOrigin]](
+        size
+    )
 
 
 def MemRealloc(
     ptr: Pointer[NoneType, origin=_], size: UInt32
-) -> Pointer[NoneType, origin=_]:
-    return external_call["MemRealloc", Pointer[NoneType, origin=_]](ptr, size)
+) -> Pointer[NoneType, origin=ImmutAnyOrigin]:
+    return external_call[
+        "MemRealloc", Pointer[NoneType, origin=ImmutAnyOrigin]
+    ](ptr, size)
 
 
 def MemFree(ptr: Pointer[NoneType, origin=_]):
@@ -524,8 +537,8 @@ def MemFree(ptr: Pointer[NoneType, origin=_]):
 
 def LoadFileData(
     fileName: Pointer[UInt8, origin=_], dataSize: Pointer[Int32, origin=_]
-) -> Pointer[UInt8, origin=_]:
-    return external_call["LoadFileData", Pointer[UInt8, origin=_]](
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call["LoadFileData", Pointer[UInt8, origin=ImmutAnyOrigin]](
         fileName, dataSize
     )
 
@@ -552,8 +565,10 @@ def ExportDataAsCode(
 
 def LoadFileText(
     fileName: Pointer[UInt8, origin=_]
-) -> Pointer[UInt8, origin=_]:
-    return external_call["LoadFileText", Pointer[UInt8, origin=_]](fileName)
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call["LoadFileText", Pointer[UInt8, origin=ImmutAnyOrigin]](
+        fileName
+    )
 
 
 def UnloadFileText(text: Pointer[UInt8, origin=_]):
@@ -644,42 +659,54 @@ def GetFileModTime(fileName: Pointer[UInt8, origin=_]) -> Int64:
 
 def GetFileExtension(
     fileName: Pointer[UInt8, origin=_]
-) -> Pointer[UInt8, origin=_]:
-    return external_call["GetFileExtension", Pointer[UInt8, origin=_]](fileName)
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "GetFileExtension", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ](fileName)
 
 
-def GetFileName(filePath: Pointer[UInt8, origin=_]) -> Pointer[UInt8, origin=_]:
-    return external_call["GetFileName", Pointer[UInt8, origin=_]](filePath)
-
-
-def GetFileNameWithoutExt(
+def GetFileName(
     filePath: Pointer[UInt8, origin=_]
-) -> Pointer[UInt8, origin=_]:
-    return external_call["GetFileNameWithoutExt", Pointer[UInt8, origin=_]](
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call["GetFileName", Pointer[UInt8, origin=ImmutAnyOrigin]](
         filePath
     )
 
 
+def GetFileNameWithoutExt(
+    filePath: Pointer[UInt8, origin=_]
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "GetFileNameWithoutExt", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ](filePath)
+
+
 def GetDirectoryPath(
     filePath: Pointer[UInt8, origin=_]
-) -> Pointer[UInt8, origin=_]:
-    return external_call["GetDirectoryPath", Pointer[UInt8, origin=_]](filePath)
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "GetDirectoryPath", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ](filePath)
 
 
 def GetPrevDirectoryPath(
     dirPath: Pointer[UInt8, origin=_]
-) -> Pointer[UInt8, origin=_]:
-    return external_call["GetPrevDirectoryPath", Pointer[UInt8, origin=_]](
-        dirPath
-    )
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "GetPrevDirectoryPath", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ](dirPath)
 
 
-def GetWorkingDirectory() -> Pointer[UInt8, origin=_]:
-    return external_call["GetWorkingDirectory", Pointer[UInt8, origin=_]]()
+def GetWorkingDirectory() -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "GetWorkingDirectory", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ]()
 
 
-def GetApplicationDirectory() -> Pointer[UInt8, origin=_]:
-    return external_call["GetApplicationDirectory", Pointer[UInt8, origin=_]]()
+def GetApplicationDirectory() -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "GetApplicationDirectory", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ]()
 
 
 def MakeDirectory(dirPath: Pointer[UInt8, origin=_]) -> Int32:
@@ -746,8 +773,8 @@ def CompressData(
     data: Pointer[UInt8, origin=_],
     dataSize: Int32,
     compDataSize: Pointer[Int32, origin=_],
-) -> Pointer[UInt8, origin=_]:
-    return external_call["CompressData", Pointer[UInt8, origin=_]](
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call["CompressData", Pointer[UInt8, origin=ImmutAnyOrigin]](
         data, dataSize, compDataSize
     )
 
@@ -756,28 +783,28 @@ def DecompressData(
     compData: Pointer[UInt8, origin=_],
     compDataSize: Int32,
     dataSize: Pointer[Int32, origin=_],
-) -> Pointer[UInt8, origin=_]:
-    return external_call["DecompressData", Pointer[UInt8, origin=_]](
-        compData, compDataSize, dataSize
-    )
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "DecompressData", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ](compData, compDataSize, dataSize)
 
 
 def EncodeDataBase64(
     data: Pointer[UInt8, origin=_],
     dataSize: Int32,
     outputSize: Pointer[Int32, origin=_],
-) -> Pointer[UInt8, origin=_]:
-    return external_call["EncodeDataBase64", Pointer[UInt8, origin=_]](
-        data, dataSize, outputSize
-    )
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "EncodeDataBase64", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ](data, dataSize, outputSize)
 
 
 def DecodeDataBase64(
     text: Pointer[UInt8, origin=_], outputSize: Pointer[Int32, origin=_]
-) -> Pointer[UInt8, origin=_]:
-    return external_call["DecodeDataBase64", Pointer[UInt8, origin=_]](
-        text, outputSize
-    )
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "DecodeDataBase64", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ](text, outputSize)
 
 
 def ComputeCRC32(data: Pointer[UInt8, origin=_], dataSize: Int32) -> UInt32:
@@ -786,26 +813,26 @@ def ComputeCRC32(data: Pointer[UInt8, origin=_], dataSize: Int32) -> UInt32:
 
 def ComputeMD5(
     data: Pointer[UInt8, origin=_], dataSize: Int32
-) -> Pointer[UInt32, origin=_]:
-    return external_call["ComputeMD5", Pointer[UInt32, origin=_]](
+) -> Pointer[UInt32, origin=ImmutAnyOrigin]:
+    return external_call["ComputeMD5", Pointer[UInt32, origin=ImmutAnyOrigin]](
         data, dataSize
     )
 
 
 def ComputeSHA1(
     data: Pointer[UInt8, origin=_], dataSize: Int32
-) -> Pointer[UInt32, origin=_]:
-    return external_call["ComputeSHA1", Pointer[UInt32, origin=_]](
+) -> Pointer[UInt32, origin=ImmutAnyOrigin]:
+    return external_call["ComputeSHA1", Pointer[UInt32, origin=ImmutAnyOrigin]](
         data, dataSize
     )
 
 
 def ComputeSHA256(
     data: Pointer[UInt8, origin=_], dataSize: Int32
-) -> Pointer[UInt32, origin=_]:
-    return external_call["ComputeSHA256", Pointer[UInt32, origin=_]](
-        data, dataSize
-    )
+) -> Pointer[UInt32, origin=ImmutAnyOrigin]:
+    return external_call[
+        "ComputeSHA256", Pointer[UInt32, origin=ImmutAnyOrigin]
+    ](data, dataSize)
 
 
 def LoadAutomationEventList(
@@ -874,8 +901,10 @@ def GetCharPressed() -> Int32:
     return external_call["GetCharPressed", Int32]()
 
 
-def GetKeyName(key: Int32) -> Pointer[UInt8, origin=_]:
-    return external_call["GetKeyName", Pointer[UInt8, origin=_]](key)
+def GetKeyName(key: Int32) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call["GetKeyName", Pointer[UInt8, origin=ImmutAnyOrigin]](
+        key
+    )
 
 
 def SetExitKey(key: Int32):
@@ -886,8 +915,10 @@ def IsGamepadAvailable(gamepad: Int32) -> Bool:
     return external_call["IsGamepadAvailable", Bool](gamepad)
 
 
-def GetGamepadName(gamepad: Int32) -> Pointer[UInt8, origin=_]:
-    return external_call["GetGamepadName", Pointer[UInt8, origin=_]](gamepad)
+def GetGamepadName(gamepad: Int32) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "GetGamepadName", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ](gamepad)
 
 
 def IsGamepadButtonPressed(gamepad: Int32, button: Int32) -> Bool:
@@ -1667,10 +1698,10 @@ def ExportImageToMemory(
     image: Image,
     fileType: Pointer[UInt8, origin=_],
     fileSize: Pointer[Int32, origin=_],
-) -> Pointer[UInt8, origin=_]:
-    return external_call["ExportImageToMemory", Pointer[UInt8, origin=_]](
-        image, fileType, fileSize
-    )
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "ExportImageToMemory", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ](image, fileType, fileSize)
 
 
 def ExportImageAsCode(image: Image, fileName: Pointer[UInt8, origin=_]) -> Bool:
@@ -1897,16 +1928,18 @@ def ImageColorReplace(
     external_call["ImageColorReplace", NoneType](image, color, replace)
 
 
-def LoadImageColors(image: Image) -> Pointer[Color, origin=_]:
-    return external_call["LoadImageColors", Pointer[Color, origin=_]](image)
+def LoadImageColors(image: Image) -> Pointer[Color, origin=ImmutAnyOrigin]:
+    return external_call[
+        "LoadImageColors", Pointer[Color, origin=ImmutAnyOrigin]
+    ](image)
 
 
 def LoadImagePalette(
     image: Image, maxPaletteSize: Int32, colorCount: Pointer[Int32, origin=_]
-) -> Pointer[Color, origin=_]:
-    return external_call["LoadImagePalette", Pointer[Color, origin=_]](
-        image, maxPaletteSize, colorCount
-    )
+) -> Pointer[Color, origin=ImmutAnyOrigin]:
+    return external_call[
+        "LoadImagePalette", Pointer[Color, origin=ImmutAnyOrigin]
+    ](image, maxPaletteSize, colorCount)
 
 
 def UnloadImageColors(colors: Pointer[Color, origin=_]):
@@ -2355,8 +2388,10 @@ def LoadFontData(
     codepointCount: Int32,
     type_: Int32,
     glyphCount: Pointer[Int32, origin=_],
-) -> Pointer[GlyphInfo, origin=_]:
-    return external_call["LoadFontData", Pointer[GlyphInfo, origin=_]](
+) -> Pointer[GlyphInfo, origin=ImmutAnyOrigin]:
+    return external_call[
+        "LoadFontData", Pointer[GlyphInfo, origin=ImmutAnyOrigin]
+    ](
         fileData,
         dataSize,
         fontSize,
@@ -2369,7 +2404,7 @@ def LoadFontData(
 
 def GenImageFontAtlas(
     glyphs: Pointer[GlyphInfo, origin=_],
-    glyphRecs: Pointer[Pointer[Rectangle, origin=_], origin=_],
+    glyphRecs: Pointer[Rectangle, origin=_],
     glyphCount: Int32,
     fontSize: Int32,
     padding: Int32,
@@ -2505,8 +2540,8 @@ def GetGlyphAtlasRec(font: Font, codepoint: Int32) -> Rectangle:
 
 def LoadUTF8(
     codepoints: Pointer[Int32, origin=_], length: Int32
-) -> Pointer[UInt8, origin=_]:
-    return external_call["LoadUTF8", Pointer[UInt8, origin=_]](
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call["LoadUTF8", Pointer[UInt8, origin=ImmutAnyOrigin]](
         codepoints, length
     )
 
@@ -2517,10 +2552,10 @@ def UnloadUTF8(text: Pointer[UInt8, origin=_]):
 
 def LoadCodepoints(
     text: Pointer[UInt8, origin=_], count: Pointer[Int32, origin=_]
-) -> Pointer[Int32, origin=_]:
-    return external_call["LoadCodepoints", Pointer[Int32, origin=_]](
-        text, count
-    )
+) -> Pointer[Int32, origin=ImmutAnyOrigin]:
+    return external_call[
+        "LoadCodepoints", Pointer[Int32, origin=ImmutAnyOrigin]
+    ](text, count)
 
 
 def UnloadCodepoints(codepoints: Pointer[Int32, origin=_]):
@@ -2551,23 +2586,21 @@ def GetCodepointPrevious(
 
 def CodepointToUTF8(
     codepoint: Int32, utf8Size: Pointer[Int32, origin=_]
-) -> Pointer[UInt8, origin=_]:
-    return external_call["CodepointToUTF8", Pointer[UInt8, origin=_]](
-        codepoint, utf8Size
-    )
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "CodepointToUTF8", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ](codepoint, utf8Size)
 
 
 def LoadTextLines(
     text: Pointer[UInt8, origin=_], count: Pointer[Int32, origin=_]
-) -> Pointer[Pointer[UInt8, origin=_], origin=_]:
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
     return external_call[
-        "LoadTextLines", Pointer[Pointer[UInt8, origin=_], origin=_]
+        "LoadTextLines", Pointer[UInt8, origin=ImmutAnyOrigin]
     ](text, count)
 
 
-def UnloadTextLines(
-    text: Pointer[Pointer[UInt8, origin=_], origin=_], lineCount: Int32
-):
+def UnloadTextLines(text: Pointer[UInt8, origin=_], lineCount: Int32):
     external_call["UnloadTextLines", NoneType](text, lineCount)
 
 
@@ -2587,40 +2620,46 @@ def TextLength(text: Pointer[UInt8, origin=_]) -> UInt32:
     return external_call["TextLength", UInt32](text)
 
 
-def TextFormat(text: Pointer[UInt8, origin=_]) -> Pointer[UInt8, origin=_]:
-    return external_call["TextFormat", Pointer[UInt8, origin=_]](text)
+def TextFormat(
+    text: Pointer[UInt8, origin=_]
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call["TextFormat", Pointer[UInt8, origin=ImmutAnyOrigin]](
+        text
+    )
 
 
 def TextSubtext(
     text: Pointer[UInt8, origin=_], position: Int32, length: Int32
-) -> Pointer[UInt8, origin=_]:
-    return external_call["TextSubtext", Pointer[UInt8, origin=_]](
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call["TextSubtext", Pointer[UInt8, origin=ImmutAnyOrigin]](
         text, position, length
     )
 
 
 def TextRemoveSpaces(
     text: Pointer[UInt8, origin=_]
-) -> Pointer[UInt8, origin=_]:
-    return external_call["TextRemoveSpaces", Pointer[UInt8, origin=_]](text)
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "TextRemoveSpaces", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ](text)
 
 
 def GetTextBetween(
     text: Pointer[UInt8, origin=_],
     begin: Pointer[UInt8, origin=_],
     end: Pointer[UInt8, origin=_],
-) -> Pointer[UInt8, origin=_]:
-    return external_call["GetTextBetween", Pointer[UInt8, origin=_]](
-        text, begin, end
-    )
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "GetTextBetween", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ](text, begin, end)
 
 
 def TextReplace(
     text: Pointer[UInt8, origin=_],
     search: Pointer[UInt8, origin=_],
     replacement: Pointer[UInt8, origin=_],
-) -> Pointer[UInt8, origin=_]:
-    return external_call["TextReplace", Pointer[UInt8, origin=_]](
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call["TextReplace", Pointer[UInt8, origin=ImmutAnyOrigin]](
         text, search, replacement
     )
 
@@ -2629,10 +2668,10 @@ def TextReplaceAlloc(
     text: Pointer[UInt8, origin=_],
     search: Pointer[UInt8, origin=_],
     replacement: Pointer[UInt8, origin=_],
-) -> Pointer[UInt8, origin=_]:
-    return external_call["TextReplaceAlloc", Pointer[UInt8, origin=_]](
-        text, search, replacement
-    )
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "TextReplaceAlloc", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ](text, search, replacement)
 
 
 def TextReplaceBetween(
@@ -2640,10 +2679,10 @@ def TextReplaceBetween(
     begin: Pointer[UInt8, origin=_],
     end: Pointer[UInt8, origin=_],
     replacement: Pointer[UInt8, origin=_],
-) -> Pointer[UInt8, origin=_]:
-    return external_call["TextReplaceBetween", Pointer[UInt8, origin=_]](
-        text, begin, end, replacement
-    )
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "TextReplaceBetween", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ](text, begin, end, replacement)
 
 
 def TextReplaceBetweenAlloc(
@@ -2651,18 +2690,18 @@ def TextReplaceBetweenAlloc(
     begin: Pointer[UInt8, origin=_],
     end: Pointer[UInt8, origin=_],
     replacement: Pointer[UInt8, origin=_],
-) -> Pointer[UInt8, origin=_]:
-    return external_call["TextReplaceBetweenAlloc", Pointer[UInt8, origin=_]](
-        text, begin, end, replacement
-    )
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "TextReplaceBetweenAlloc", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ](text, begin, end, replacement)
 
 
 def TextInsert(
     text: Pointer[UInt8, origin=_],
     insert: Pointer[UInt8, origin=_],
     position: Int32,
-) -> Pointer[UInt8, origin=_]:
-    return external_call["TextInsert", Pointer[UInt8, origin=_]](
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call["TextInsert", Pointer[UInt8, origin=ImmutAnyOrigin]](
         text, insert, position
     )
 
@@ -2671,18 +2710,18 @@ def TextInsertAlloc(
     text: Pointer[UInt8, origin=_],
     insert: Pointer[UInt8, origin=_],
     position: Int32,
-) -> Pointer[UInt8, origin=_]:
-    return external_call["TextInsertAlloc", Pointer[UInt8, origin=_]](
-        text, insert, position
-    )
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "TextInsertAlloc", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ](text, insert, position)
 
 
 def TextJoin(
-    textList: Pointer[Pointer[UInt8, origin=_], origin=_],
+    textList: Pointer[UInt8, origin=_],
     count: Int32,
     delimiter: Pointer[UInt8, origin=_],
-) -> Pointer[UInt8, origin=_]:
-    return external_call["TextJoin", Pointer[UInt8, origin=_]](
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call["TextJoin", Pointer[UInt8, origin=ImmutAnyOrigin]](
         textList, count, delimiter
     )
 
@@ -2691,10 +2730,10 @@ def TextSplit(
     text: Pointer[UInt8, origin=_],
     delimiter: Int8,
     count: Pointer[Int32, origin=_],
-) -> Pointer[Pointer[UInt8, origin=_], origin=_]:
-    return external_call[
-        "TextSplit", Pointer[Pointer[UInt8, origin=_], origin=_]
-    ](text, delimiter, count)
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call["TextSplit", Pointer[UInt8, origin=ImmutAnyOrigin]](
+        text, delimiter, count
+    )
 
 
 def TextAppend(
@@ -2711,24 +2750,44 @@ def TextFindIndex(
     return external_call["TextFindIndex", Int32](text, search)
 
 
-def TextToUpper(text: Pointer[UInt8, origin=_]) -> Pointer[UInt8, origin=_]:
-    return external_call["TextToUpper", Pointer[UInt8, origin=_]](text)
+def TextToUpper(
+    text: Pointer[UInt8, origin=_]
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call["TextToUpper", Pointer[UInt8, origin=ImmutAnyOrigin]](
+        text
+    )
 
 
-def TextToLower(text: Pointer[UInt8, origin=_]) -> Pointer[UInt8, origin=_]:
-    return external_call["TextToLower", Pointer[UInt8, origin=_]](text)
+def TextToLower(
+    text: Pointer[UInt8, origin=_]
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call["TextToLower", Pointer[UInt8, origin=ImmutAnyOrigin]](
+        text
+    )
 
 
-def TextToPascal(text: Pointer[UInt8, origin=_]) -> Pointer[UInt8, origin=_]:
-    return external_call["TextToPascal", Pointer[UInt8, origin=_]](text)
+def TextToPascal(
+    text: Pointer[UInt8, origin=_]
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call["TextToPascal", Pointer[UInt8, origin=ImmutAnyOrigin]](
+        text
+    )
 
 
-def TextToSnake(text: Pointer[UInt8, origin=_]) -> Pointer[UInt8, origin=_]:
-    return external_call["TextToSnake", Pointer[UInt8, origin=_]](text)
+def TextToSnake(
+    text: Pointer[UInt8, origin=_]
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call["TextToSnake", Pointer[UInt8, origin=ImmutAnyOrigin]](
+        text
+    )
 
 
-def TextToCamel(text: Pointer[UInt8, origin=_]) -> Pointer[UInt8, origin=_]:
-    return external_call["TextToCamel", Pointer[UInt8, origin=_]](text)
+def TextToCamel(
+    text: Pointer[UInt8, origin=_]
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call["TextToCamel", Pointer[UInt8, origin=ImmutAnyOrigin]](
+        text
+    )
 
 
 def TextToInteger(text: Pointer[UInt8, origin=_]) -> Int32:
@@ -3121,10 +3180,10 @@ def GenMeshCubicmap(cubicmap: Image, cubeSize: Vector3) -> Mesh:
 
 def LoadMaterials(
     fileName: Pointer[UInt8, origin=_], materialCount: Pointer[Int32, origin=_]
-) -> Pointer[Material, origin=_]:
-    return external_call["LoadMaterials", Pointer[Material, origin=_]](
-        fileName, materialCount
-    )
+) -> Pointer[Material, origin=ImmutAnyOrigin]:
+    return external_call[
+        "LoadMaterials", Pointer[Material, origin=ImmutAnyOrigin]
+    ](fileName, materialCount)
 
 
 def LoadMaterialDefault() -> Material:
@@ -3153,9 +3212,9 @@ def SetModelMeshMaterial(
 
 def LoadModelAnimations(
     fileName: Pointer[UInt8, origin=_], animCount: Pointer[Int32, origin=_]
-) -> Pointer[ModelAnimation, origin=_]:
+) -> Pointer[ModelAnimation, origin=ImmutAnyOrigin]:
     return external_call[
-        "LoadModelAnimations", Pointer[ModelAnimation, origin=_]
+        "LoadModelAnimations", Pointer[ModelAnimation, origin=ImmutAnyOrigin]
     ](fileName, animCount)
 
 
@@ -3373,8 +3432,10 @@ def WaveFormat(
     )
 
 
-def LoadWaveSamples(wave: Wave) -> Pointer[Float32, origin=_]:
-    return external_call["LoadWaveSamples", Pointer[Float32, origin=_]](wave)
+def LoadWaveSamples(wave: Wave) -> Pointer[Float32, origin=ImmutAnyOrigin]:
+    return external_call[
+        "LoadWaveSamples", Pointer[Float32, origin=ImmutAnyOrigin]
+    ](wave)
 
 
 def UnloadWaveSamples(samples: Pointer[Float32, origin=_]):

@@ -229,11 +229,6 @@ def trace_ray_gpu(
     return shaded_color
 
 
-# ===-----------------------------------------------------------------------===#
-# GPU Kernel Definition (Executed on CUDA Threads)
-# ===-----------------------------------------------------------------------===#
-
-
 def raytracer_gpu_kernel(
     output: Pointer[Scalar[dtype], MutAnyOrigin],
     width_dev: Int32,

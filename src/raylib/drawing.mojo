@@ -10,10 +10,6 @@ from raylib.types import (
 )
 import raylib.c as c
 
-# ===-----------------------------------------------------------------------===#
-# Frame Control & Clear
-# ===-----------------------------------------------------------------------===#
-
 
 def begin_drawing():
     """Setup canvas (framebuffer) to start drawing."""

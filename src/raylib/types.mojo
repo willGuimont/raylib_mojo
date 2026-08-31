@@ -3,10 +3,6 @@
 from std.ffi import c_int, c_uint, c_float, c_char
 from std.math import abs, sqrt, sin, cos, acos, asin, atan2, min, max
 
-# ===-----------------------------------------------------------------------===#
-# Vector2
-# ===-----------------------------------------------------------------------===#
-
 
 struct Vector2(
     Equatable, ImplicitlyCopyable, TrivialRegisterPassable, Writable
@@ -212,11 +208,6 @@ struct Vector2(
     @always_inline
     def __ne__(self, other: Self) -> Bool:
         return not (self == other)
-
-
-# ===-----------------------------------------------------------------------===#
-# Vector3
-# ===-----------------------------------------------------------------------===#
 
 
 struct Vector3(
@@ -464,11 +455,6 @@ struct Vector3(
         return not (self == other)
 
 
-# ===-----------------------------------------------------------------------===#
-# Vector4
-# ===-----------------------------------------------------------------------===#
-
-
 struct Vector4(
     Equatable, ImplicitlyCopyable, TrivialRegisterPassable, Writable
 ):
@@ -702,11 +688,6 @@ struct Vector4(
         return not (self == other)
 
 
-# ===-----------------------------------------------------------------------===#
-# Quaternion
-# ===-----------------------------------------------------------------------===#
-
-
 struct Quaternion(
     Equatable, ImplicitlyCopyable, TrivialRegisterPassable, Writable
 ):
@@ -821,11 +802,6 @@ struct Quaternion(
     @always_inline
     def __ne__(self, other: Self) -> Bool:
         return not (self == other)
-
-
-# ===-----------------------------------------------------------------------===#
-# Matrix
-# ===-----------------------------------------------------------------------===#
 
 
 struct Matrix(Equatable, ImplicitlyCopyable, TrivialRegisterPassable, Writable):
@@ -1085,11 +1061,6 @@ struct Matrix(Equatable, ImplicitlyCopyable, TrivialRegisterPassable, Writable):
         return not (self == other)
 
 
-# ===-----------------------------------------------------------------------===#
-# Color
-# ===-----------------------------------------------------------------------===#
-
-
 struct Color(Equatable, ImplicitlyCopyable, TrivialRegisterPassable, Writable):
     """Color RGBA type (4 unsigned byte components)."""
 
@@ -1142,11 +1113,6 @@ struct Color(Equatable, ImplicitlyCopyable, TrivialRegisterPassable, Writable):
             UInt8(min(max(v.z * 255.0, 0.0), 255.0)),
             UInt8(min(max(v.w * 255.0, 0.0), 255.0)),
         )
-
-
-# ===-----------------------------------------------------------------------===#
-# Rectangle
-# ===-----------------------------------------------------------------------===#
 
 
 struct Rectangle(
@@ -1211,11 +1177,6 @@ struct Rectangle(
         return Vector2(self.width, self.height)
 
 
-# ===-----------------------------------------------------------------------===#
-# Image
-# ===-----------------------------------------------------------------------===#
-
-
 struct Image(ImplicitlyCopyable, TrivialRegisterPassable):
     """Image data type (RAM pixel data)."""
 
@@ -1232,10 +1193,41 @@ struct Image(ImplicitlyCopyable, TrivialRegisterPassable):
         self.mipmaps = 0
         self.format = 0
 
+    # --- Methods & Factories ---
+    @staticmethod
+    def load(file_name: String) -> Image:
+        import raylib.c as c
 
-# ===-----------------------------------------------------------------------===#
-# Texture
-# ===-----------------------------------------------------------------------===#
+        return c.LoadImage(file_name.unsafe_uint8_ptr())
+
+    @staticmethod
+    def gen_checked(
+        width: Int32,
+        height: Int32,
+        checks_x: Int32,
+        checks_y: Int32,
+        col1: Color,
+        col2: Color,
+    ) -> Image:
+        import raylib.c as c
+
+        return c.GenImageChecked(width, height, checks_x, checks_y, col1, col2)
+
+    @staticmethod
+    def gen_color(width: Int32, height: Int32, color: Color) -> Image:
+        import raylib.c as c
+
+        return c.GenImageColor(width, height, color)
+
+    def to_texture(self) -> Texture:
+        import raylib.c as c
+
+        return c.LoadTextureFromImage(self)
+
+    def unload(self):
+        import raylib.c as c
+
+        c.UnloadImage(self)
 
 
 struct Texture(ImplicitlyCopyable, TrivialRegisterPassable):
@@ -1254,10 +1246,53 @@ struct Texture(ImplicitlyCopyable, TrivialRegisterPassable):
         self.mipmaps = 0
         self.format = 0
 
+    # --- Methods & Factories ---
+    @staticmethod
+    def load(file_name: String) -> Texture:
+        import raylib.c as c
 
-# ===-----------------------------------------------------------------------===#
-# RenderTexture
-# ===-----------------------------------------------------------------------===#
+        return c.LoadTexture(file_name.unsafe_uint8_ptr())
+
+    @staticmethod
+    def from_image(image: Image) -> Texture:
+        import raylib.c as c
+
+        return c.LoadTextureFromImage(image)
+
+    def draw(
+        self,
+        posX: Int32,
+        posY: Int32,
+        tint: Color = Color(255, 255, 255, 255),
+    ):
+        import raylib.c as c
+
+        c.DrawTexture(self, posX, posY, tint)
+
+    def draw_v(
+        self,
+        position: Vector2,
+        tint: Color = Color(255, 255, 255, 255),
+    ):
+        import raylib.c as c
+
+        c.DrawTextureV(self, position, tint)
+
+    def draw_ex(
+        self,
+        position: Vector2,
+        rotation: Float32,
+        scale: Float32,
+        tint: Color = Color(255, 255, 255, 255),
+    ):
+        import raylib.c as c
+
+        c.DrawTextureEx(self, position, rotation, scale, tint)
+
+    def unload(self):
+        import raylib.c as c
+
+        c.UnloadTexture(self)
 
 
 struct RenderTexture(ImplicitlyCopyable, TrivialRegisterPassable):
@@ -1271,11 +1306,6 @@ struct RenderTexture(ImplicitlyCopyable, TrivialRegisterPassable):
         self.id = 0
         self.texture = Texture()
         self.depth = Texture()
-
-
-# ===-----------------------------------------------------------------------===#
-# NPatchInfo
-# ===-----------------------------------------------------------------------===#
 
 
 struct NPatchInfo(ImplicitlyCopyable, TrivialRegisterPassable):
@@ -1297,11 +1327,6 @@ struct NPatchInfo(ImplicitlyCopyable, TrivialRegisterPassable):
         self.layout = 0
 
 
-# ===-----------------------------------------------------------------------===#
-# GlyphInfo
-# ===-----------------------------------------------------------------------===#
-
-
 struct GlyphInfo(ImplicitlyCopyable, TrivialRegisterPassable):
     """Font glyph info type."""
 
@@ -1317,11 +1342,6 @@ struct GlyphInfo(ImplicitlyCopyable, TrivialRegisterPassable):
         self.offsetY = 0
         self.advanceX = 0
         self.image = Image()
-
-
-# ===-----------------------------------------------------------------------===#
-# Font
-# ===-----------------------------------------------------------------------===#
 
 
 struct Font(ImplicitlyCopyable, TrivialRegisterPassable):
@@ -1341,11 +1361,6 @@ struct Font(ImplicitlyCopyable, TrivialRegisterPassable):
         self.texture = Texture()
         self.recs = 0
         self.glyphs = 0
-
-
-# ===-----------------------------------------------------------------------===#
-# Camera3D
-# ===-----------------------------------------------------------------------===#
 
 
 struct Camera3D(ImplicitlyCopyable, TrivialRegisterPassable):
@@ -1372,11 +1387,6 @@ struct Camera3D(ImplicitlyCopyable, TrivialRegisterPassable):
         self.projection = projection
 
 
-# ===-----------------------------------------------------------------------===#
-# Camera2D
-# ===-----------------------------------------------------------------------===#
-
-
 struct Camera2D(ImplicitlyCopyable, TrivialRegisterPassable):
     """Camera2D type (offset, target, rotation, zoom)."""
 
@@ -1398,25 +1408,111 @@ struct Camera2D(ImplicitlyCopyable, TrivialRegisterPassable):
         self.zoom = zoom
 
 
-# ===-----------------------------------------------------------------------===#
-# Mesh
-# ===-----------------------------------------------------------------------===#
-
-
 struct Mesh(ImplicitlyCopyable, TrivialRegisterPassable):
     """Mesh type (vertex and triangle data)."""
 
     var vertexCount: Int32
     var triangleCount: Int32
+    var vertices: Int
+    var texcoords: Int
+    var texcoords2: Int
+    var normals: Int
+    var tangents: Int
+    var colors: Int
+    var indices: Int
+    var boneCount: Int32
+    var boneIndices: Int
+    var boneWeights: Int
+    var animVertices: Int
+    var animNormals: Int
+    var vaoId: UInt32
+    var vboId: Int
 
     def __init__(out self):
         self.vertexCount = 0
         self.triangleCount = 0
+        self.vertices = 0
+        self.texcoords = 0
+        self.texcoords2 = 0
+        self.normals = 0
+        self.tangents = 0
+        self.colors = 0
+        self.indices = 0
+        self.boneCount = 0
+        self.boneIndices = 0
+        self.boneWeights = 0
+        self.animVertices = 0
+        self.animNormals = 0
+        self.vaoId = 0
+        self.vboId = 0
 
+    # --- Methods & Factories ---
+    @staticmethod
+    def gen_plane(
+        width: Float32, length: Float32, res_x: Int32 = 2, res_z: Int32 = 2
+    ) -> Mesh:
+        import raylib.c as c
 
-# ===-----------------------------------------------------------------------===#
-# Shader
-# ===-----------------------------------------------------------------------===#
+        return c.GenMeshPlane(width, length, res_x, res_z)
+
+    @staticmethod
+    def gen_cube(width: Float32, height: Float32, length: Float32) -> Mesh:
+        import raylib.c as c
+
+        return c.GenMeshCube(width, height, length)
+
+    @staticmethod
+    def gen_sphere(
+        radius: Float32, rings: Int32 = 16, slices: Int32 = 16
+    ) -> Mesh:
+        import raylib.c as c
+
+        return c.GenMeshSphere(radius, rings, slices)
+
+    @staticmethod
+    def gen_cylinder(
+        radius: Float32, height: Float32, slices: Int32 = 16
+    ) -> Mesh:
+        import raylib.c as c
+
+        return c.GenMeshCylinder(radius, height, slices)
+
+    @staticmethod
+    def gen_torus(
+        radius: Float32, size: Float32, rad_seg: Int32 = 16, sides: Int32 = 16
+    ) -> Mesh:
+        import raylib.c as c
+
+        return c.GenMeshTorus(radius, size, rad_seg, sides)
+
+    @staticmethod
+    def gen_knot(
+        radius: Float32, size: Float32, rad_seg: Int32 = 16, sides: Int32 = 32
+    ) -> Mesh:
+        import raylib.c as c
+
+        return c.GenMeshKnot(radius, size, rad_seg, sides)
+
+    @staticmethod
+    def gen_poly(sides: Int32, radius: Float32) -> Mesh:
+        import raylib.c as c
+
+        return c.GenMeshPoly(sides, radius)
+
+    def to_model(self) -> Model:
+        import raylib.c as c
+
+        return c.LoadModelFromMesh(self)
+
+    def draw(self, material: Material, transform: Matrix):
+        import raylib.c as c
+
+        c.DrawMesh(self, material, transform)
+
+    def unload(self):
+        import raylib.c as c
+
+        c.UnloadMesh(self)
 
 
 struct Shader(ImplicitlyCopyable, TrivialRegisterPassable):
@@ -1428,11 +1524,6 @@ struct Shader(ImplicitlyCopyable, TrivialRegisterPassable):
     def __init__(out self):
         self.id = 0
         self.locs = 0
-
-
-# ===-----------------------------------------------------------------------===#
-# MaterialMap
-# ===-----------------------------------------------------------------------===#
 
 
 struct MaterialMap(ImplicitlyCopyable, TrivialRegisterPassable):
@@ -1448,27 +1539,36 @@ struct MaterialMap(ImplicitlyCopyable, TrivialRegisterPassable):
         self.value = 0.0
 
 
-# ===-----------------------------------------------------------------------===#
-# Material
-# ===-----------------------------------------------------------------------===#
-
-
 struct Material(ImplicitlyCopyable, TrivialRegisterPassable):
     """Material type (shader and material maps)."""
 
     var shader: Shader
     var maps: Int
-    var params: Int
+    var param0: Float32
+    var param1: Float32
+    var param2: Float32
+    var param3: Float32
 
     def __init__(out self):
         self.shader = Shader()
         self.maps = 0
-        self.params = 0
+        self.param0 = 0.0
+        self.param1 = 0.0
+        self.param2 = 0.0
+        self.param3 = 0.0
 
 
-# ===-----------------------------------------------------------------------===#
-# Model
-# ===-----------------------------------------------------------------------===#
+struct ModelSkeleton(ImplicitlyCopyable, TrivialRegisterPassable):
+    """ModelSkeleton type (bones hierarchy)."""
+
+    var boneCount: Int32
+    var bones: Int
+    var bindPose: Int
+
+    def __init__(out self):
+        self.boneCount = 0
+        self.bones = 0
+        self.bindPose = 0
 
 
 struct Model(ImplicitlyCopyable, TrivialRegisterPassable):
@@ -1477,16 +1577,101 @@ struct Model(ImplicitlyCopyable, TrivialRegisterPassable):
     var transform: Matrix
     var meshCount: Int32
     var materialCount: Int32
+    var meshes: Int
+    var materials: Int
+    var meshMaterial: Int
+    var skeleton: ModelSkeleton
+    var currentPose: Int
+    var boneMatrices: Int
 
     def __init__(out self):
         self.transform = Matrix()
         self.meshCount = 0
         self.materialCount = 0
+        self.meshes = 0
+        self.materials = 0
+        self.meshMaterial = 0
+        self.skeleton = ModelSkeleton()
+        self.currentPose = 0
+        self.boneMatrices = 0
 
+    # --- Methods & Factories ---
+    @staticmethod
+    def load(file_name: String) -> Model:
+        import raylib.c as c
 
-# ===-----------------------------------------------------------------------===#
-# Ray
-# ===-----------------------------------------------------------------------===#
+        return c.LoadModel(file_name.unsafe_uint8_ptr())
+
+    @staticmethod
+    def from_mesh(mesh: Mesh) -> Model:
+        import raylib.c as c
+
+        return c.LoadModelFromMesh(mesh)
+
+    def draw(
+        self,
+        position: Vector3 = Vector3(0.0, 0.0, 0.0),
+        scale: Float32 = 1.0,
+        tint: Color = Color(255, 255, 255, 255),
+    ):
+        import raylib.c as c
+
+        c.DrawModel(self, position, scale, tint)
+
+    def draw_wires(
+        self,
+        position: Vector3 = Vector3(0.0, 0.0, 0.0),
+        scale: Float32 = 1.0,
+        tint: Color = Color(80, 80, 80, 255),
+    ):
+        import raylib.c as c
+
+        c.DrawModelWires(self, position, scale, tint)
+
+    def draw_ex(
+        self,
+        position: Vector3,
+        rotation_axis: Vector3,
+        rotation_angle: Float32,
+        scale: Vector3,
+        tint: Color = Color(255, 255, 255, 255),
+    ):
+        import raylib.c as c
+
+        c.DrawModelEx(
+            self, position, rotation_axis, rotation_angle, scale, tint
+        )
+
+    def set_material_texture(self, map_type: Int32, texture: Texture):
+        import raylib.c as c
+        from std.origin import ImmutAnyOrigin
+        from std.memory import Pointer
+
+        c.SetMaterialTexture(
+            Pointer[c.Material, origin=ImmutAnyOrigin](
+                unsafe_from_address=self.materials
+            ),
+            map_type,
+            texture,
+        )
+
+    def set_texture(self, texture: Texture):
+        self.set_material_texture(0, texture)
+
+    def update_animation(self, anim: ModelAnimation, frame: Int32):
+        import raylib.c as c
+
+        c.UpdateModelAnimation(self, anim, frame)
+
+    def is_animation_valid(self, anim: ModelAnimation) -> Bool:
+        import raylib.c as c
+
+        return c.IsModelAnimationValid(self, anim)
+
+    def unload(self):
+        import raylib.c as c
+
+        c.UnloadModel(self)
 
 
 struct Ray(ImplicitlyCopyable, TrivialRegisterPassable):
@@ -1504,11 +1689,6 @@ struct Ray(ImplicitlyCopyable, TrivialRegisterPassable):
         self.direction = direction
 
 
-# ===-----------------------------------------------------------------------===#
-# RayCollision
-# ===-----------------------------------------------------------------------===#
-
-
 struct RayCollision(ImplicitlyCopyable, TrivialRegisterPassable):
     """RayCollision type (hit details)."""
 
@@ -1524,11 +1704,6 @@ struct RayCollision(ImplicitlyCopyable, TrivialRegisterPassable):
         self.normal = Vector3()
 
 
-# ===-----------------------------------------------------------------------===#
-# BoundingBox
-# ===-----------------------------------------------------------------------===#
-
-
 struct BoundingBox(ImplicitlyCopyable, TrivialRegisterPassable):
     """BoundingBox type (min and max Vector3 corners)."""
 
@@ -1542,11 +1717,6 @@ struct BoundingBox(ImplicitlyCopyable, TrivialRegisterPassable):
     ):
         self.min = min
         self.max = max
-
-
-# ===-----------------------------------------------------------------------===#
-# Wave
-# ===-----------------------------------------------------------------------===#
 
 
 struct Wave(ImplicitlyCopyable, TrivialRegisterPassable):
@@ -1566,11 +1736,6 @@ struct Wave(ImplicitlyCopyable, TrivialRegisterPassable):
         self.data = 0
 
 
-# ===-----------------------------------------------------------------------===#
-# AudioStream
-# ===-----------------------------------------------------------------------===#
-
-
 struct AudioStream(ImplicitlyCopyable, TrivialRegisterPassable):
     """AudioStream type (raw audio stream buffer)."""
 
@@ -1588,11 +1753,6 @@ struct AudioStream(ImplicitlyCopyable, TrivialRegisterPassable):
         self.channels = 0
 
 
-# ===-----------------------------------------------------------------------===#
-# Sound
-# ===-----------------------------------------------------------------------===#
-
-
 struct Sound(ImplicitlyCopyable, TrivialRegisterPassable):
     """Sound audio source type."""
 
@@ -1603,10 +1763,42 @@ struct Sound(ImplicitlyCopyable, TrivialRegisterPassable):
         self.stream = AudioStream()
         self.frameCount = 0
 
+    # --- Methods & Factories ---
+    @staticmethod
+    def load(file_name: String) -> Sound:
+        import raylib.c as c
 
-# ===-----------------------------------------------------------------------===#
-# Music
-# ===-----------------------------------------------------------------------===#
+        return c.LoadSound(file_name.unsafe_uint8_ptr())
+
+    def play(self):
+        import raylib.c as c
+
+        c.PlaySound(self)
+
+    def stop(self):
+        import raylib.c as c
+
+        c.StopSound(self)
+
+    def pause(self):
+        import raylib.c as c
+
+        c.PauseSound(self)
+
+    def resume(self):
+        import raylib.c as c
+
+        c.ResumeSound(self)
+
+    def is_playing(self) -> Bool:
+        import raylib.c as c
+
+        return c.IsSoundPlaying(self)
+
+    def unload(self):
+        import raylib.c as c
+
+        c.UnloadSound(self)
 
 
 struct Music(ImplicitlyCopyable, TrivialRegisterPassable):
@@ -1624,3 +1816,309 @@ struct Music(ImplicitlyCopyable, TrivialRegisterPassable):
         self.looping = False
         self.ctxType = 0
         self.ctxData = 0
+
+    # --- Methods & Factories ---
+    @staticmethod
+    def load(file_name: String) -> Music:
+        import raylib.c as c
+
+        return c.LoadMusicStream(file_name.unsafe_uint8_ptr())
+
+    def play(self):
+        import raylib.c as c
+
+        c.PlayMusicStream(self)
+
+    def stop(self):
+        import raylib.c as c
+
+        c.StopMusicStream(self)
+
+    def pause(self):
+        import raylib.c as c
+
+        c.PauseMusicStream(self)
+
+    def resume(self):
+        import raylib.c as c
+
+        c.ResumeMusicStream(self)
+
+    def is_playing(self) -> Bool:
+        import raylib.c as c
+
+        return c.IsMusicStreamPlaying(self)
+
+    def update(self):
+        import raylib.c as c
+
+        c.UpdateMusicStream(self)
+
+    def unload(self):
+        import raylib.c as c
+
+        c.UnloadMusicStream(self)
+
+
+struct Transform(
+    Equatable, ImplicitlyCopyable, TrivialRegisterPassable, Writable
+):
+    """Transform, vertex transformation data."""
+
+    var translation: Vector3
+    var rotation: Quaternion
+    var scale: Vector3
+
+    def __init__(
+        out self,
+        translation: Vector3 = Vector3(),
+        rotation: Quaternion = Quaternion(0.0, 0.0, 0.0, 1.0),
+        scale: Vector3 = Vector3(1.0, 1.0, 1.0),
+    ):
+        self.translation = translation
+        self.rotation = rotation
+        self.scale = scale
+
+    @staticmethod
+    @always_inline
+    def identity() -> Self:
+        return Self(
+            Vector3(), Quaternion(0.0, 0.0, 0.0, 1.0), Vector3(1.0, 1.0, 1.0)
+        )
+
+    @always_inline
+    def translate(self, delta: Vector3) -> Self:
+        return Self(self.translation + delta, self.rotation, self.scale)
+
+    @always_inline
+    def scale_by(self, factor: Float32) -> Self:
+        return Self(self.translation, self.rotation, self.scale * factor)
+
+    @always_inline
+    def write_to[W: Writer](self, mut writer: W):
+        writer.write(
+            "Transform(translation=",
+            self.translation,
+            ", rotation=",
+            self.rotation,
+            ", scale=",
+            self.scale,
+            ")",
+        )
+
+
+struct BoneInfo(ImplicitlyCopyable, TrivialRegisterPassable):
+    """BoneInfo, skeletal animation bone."""
+
+    var name0: UInt64
+    var name1: UInt64
+    var name2: UInt64
+    var name3: UInt64
+    var parent: Int32
+
+    def __init__(out self):
+        self.name0 = 0
+        self.name1 = 0
+        self.name2 = 0
+        self.name3 = 0
+        self.parent = 0
+
+
+struct ModelAnimation(ImplicitlyCopyable, TrivialRegisterPassable):
+    """ModelAnimation, contains a full animation sequence."""
+
+    var name0: UInt64
+    var name1: UInt64
+    var name2: UInt64
+    var name3: UInt64
+    var boneCount: Int32
+    var keyframeCount: Int32
+    var keyframePoses: Int
+
+    def __init__(out self):
+        self.name0 = 0
+        self.name1 = 0
+        self.name2 = 0
+        self.name3 = 0
+        self.boneCount = 0
+        self.keyframeCount = 0
+        self.keyframePoses = 0
+
+    # --- Methods & Factories ---
+    def update(self, model: Model, frame: Int32):
+        import raylib.c as c
+
+        c.UpdateModelAnimation(model, self, frame)
+
+    def is_valid(self, model: Model) -> Bool:
+        import raylib.c as c
+
+        return c.IsModelAnimationValid(model, self)
+
+    def unload(self):
+        import raylib.c as c
+
+        c.UnloadModelAnimation(self)
+
+
+struct VrDeviceInfo(ImplicitlyCopyable, TrivialRegisterPassable):
+    """VrDeviceInfo, Head-Mounted-Display device parameters."""
+
+    var hResolution: Int32
+    var vResolution: Int32
+    var hScreenSize: Float32
+    var vScreenSize: Float32
+    var eyeToScreenDistance: Float32
+    var lensSeparationDistance: Float32
+    var interpupillaryDistance: Float32
+    var lensDistortionValue0: Float32
+    var lensDistortionValue1: Float32
+    var lensDistortionValue2: Float32
+    var lensDistortionValue3: Float32
+    var chromaAbCorrection0: Float32
+    var chromaAbCorrection1: Float32
+    var chromaAbCorrection2: Float32
+    var chromaAbCorrection3: Float32
+
+    def __init__(out self):
+        self.hResolution = 0
+        self.vResolution = 0
+        self.hScreenSize = 0.0
+        self.vScreenSize = 0.0
+        self.eyeToScreenDistance = 0.0
+        self.lensSeparationDistance = 0.0
+        self.interpupillaryDistance = 0.0
+        self.lensDistortionValue0 = 0.0
+        self.lensDistortionValue1 = 0.0
+        self.lensDistortionValue2 = 0.0
+        self.lensDistortionValue3 = 0.0
+        self.chromaAbCorrection0 = 0.0
+        self.chromaAbCorrection1 = 0.0
+        self.chromaAbCorrection2 = 0.0
+        self.chromaAbCorrection3 = 0.0
+
+
+struct VrStereoConfig(ImplicitlyCopyable, TrivialRegisterPassable):
+    """VrStereoConfig, VR stereo rendering configuration."""
+
+    var projectionLeft: Matrix
+    var projectionRight: Matrix
+    var viewOffsetLeft: Matrix
+    var viewOffsetRight: Matrix
+    var leftLensCenter0: Float32
+    var leftLensCenter1: Float32
+    var rightLensCenter0: Float32
+    var rightLensCenter1: Float32
+    var leftScreenCenter0: Float32
+    var leftScreenCenter1: Float32
+    var rightScreenCenter0: Float32
+    var rightScreenCenter1: Float32
+    var scale0: Float32
+    var scale1: Float32
+    var scaleIn0: Float32
+    var scaleIn1: Float32
+
+    def __init__(out self):
+        self.projectionLeft = Matrix()
+        self.projectionRight = Matrix()
+        self.viewOffsetLeft = Matrix()
+        self.viewOffsetRight = Matrix()
+        self.leftLensCenter0 = 0.0
+        self.leftLensCenter1 = 0.0
+        self.rightLensCenter0 = 0.0
+        self.rightLensCenter1 = 0.0
+        self.leftScreenCenter0 = 0.0
+        self.leftScreenCenter1 = 0.0
+        self.rightScreenCenter0 = 0.0
+        self.rightScreenCenter1 = 0.0
+        self.scale0 = 0.0
+        self.scale1 = 0.0
+        self.scaleIn0 = 0.0
+        self.scaleIn1 = 0.0
+
+
+struct FilePathList(ImplicitlyCopyable, TrivialRegisterPassable):
+    """FilePathList type."""
+
+    var count: UInt32
+    var capacity: UInt32
+    var paths: Int
+
+    def __init__(out self):
+        self.count = 0
+        self.capacity = 0
+        self.paths = 0
+
+    # --- Methods & Factories ---
+    @staticmethod
+    def load_directory(dir_path: String) -> FilePathList:
+        import raylib.c as c
+
+        return c.LoadDirectoryFiles(dir_path.unsafe_uint8_ptr())
+
+    @staticmethod
+    def load_dropped() -> FilePathList:
+        import raylib.c as c
+
+        return c.LoadDroppedFiles()
+
+    def unload(self):
+        import raylib.c as c
+
+        c.UnloadFilePathList(self)
+
+    def __len__(self) -> Int:
+        return Int(self.count)
+
+
+struct AutomationEvent(ImplicitlyCopyable, TrivialRegisterPassable):
+    """AutomationEvent type."""
+
+    var frame: UInt32
+    var type: UInt32
+    var param0: Int32
+    var param1: Int32
+    var param2: Int32
+    var param3: Int32
+
+    def __init__(out self):
+        self.frame = 0
+        self.type = 0
+        self.param0 = 0
+        self.param1 = 0
+        self.param2 = 0
+        self.param3 = 0
+
+
+struct AutomationEventList(ImplicitlyCopyable, TrivialRegisterPassable):
+    """AutomationEventList type."""
+
+    var capacity: UInt32
+    var count: UInt32
+    var events: Int
+
+    def __init__(out self):
+        self.capacity = 0
+        self.count = 0
+        self.events = 0
+
+    # --- Methods & Factories ---
+    @staticmethod
+    def load(file_name: String = "") -> AutomationEventList:
+        import raylib.c as c
+        from std.origin import ImmutAnyOrigin
+        from std.memory import Pointer
+
+        if len(file_name) == 0:
+            return c.LoadAutomationEventList(
+                Pointer[UInt8, origin=ImmutAnyOrigin]()
+            )
+        return c.LoadAutomationEventList(file_name.unsafe_uint8_ptr())
+
+    def unload(self):
+        import raylib.c as c
+
+        c.UnloadAutomationEventList(self)
+
+    def __len__(self) -> Int:
+        return Int(self.count)

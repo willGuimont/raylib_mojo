@@ -26,6 +26,14 @@ from raylib.types import (
     AudioStream,
     Sound,
     Music,
+    Transform,
+    BoneInfo,
+    ModelAnimation,
+    VrDeviceInfo,
+    VrStereoConfig,
+    FilePathList,
+    AutomationEvent,
+    AutomationEventList,
 )
 
 from raylib.colors import (
@@ -180,6 +188,34 @@ from raylib.audio import (
     is_sound_playing,
 )
 
+from raylib.models import (
+    load_model,
+    load_model_from_mesh,
+    draw_model,
+    draw_model_wires,
+    draw_model_ex,
+    set_model_material_texture,
+    set_model_texture,
+    unload_model,
+    gen_mesh_plane,
+    gen_mesh_cube,
+    gen_mesh_sphere,
+    gen_mesh_cylinder,
+    gen_mesh_torus,
+    gen_mesh_knot,
+    gen_mesh_poly,
+    draw_mesh,
+    unload_mesh,
+    update_model_animation,
+    is_model_animation_valid,
+    unload_model_animation,
+    load_directory_files,
+    load_dropped_files,
+    unload_file_path_list,
+    load_automation_event_list,
+    unload_automation_event_list,
+)
+
 import raylib.c as c
 import raylib.c_math as c_math
 import raylib.c_rlgl as c_rlgl
@@ -189,3 +225,4 @@ import raylib.raymath as raymath
 import raylib.rlgl as rlgl
 import raylib.rcamera as rcamera
 import raylib.rgestures as rgestures
+import raylib.models as models

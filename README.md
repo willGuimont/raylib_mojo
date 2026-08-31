@@ -90,7 +90,9 @@ git submodule update --init --recursive
 ### 2. Configure `pixi.toml` / `mojoproject.toml`
 
 Depend on the `shim` package that ships with `raylib_mojo`. Pixi builds raylib
-and installs `libraylib.so` into your environment:
+and installs `libraylib.so` into your environment.
+
+When added via `shelf add` (which places tins in `shelf/raylib_mojo/`):
 
 ```toml
 [workspace]
@@ -103,12 +105,14 @@ preview = ["pixi-build"]
 [dependencies]
 max = ">=26.5.0"
 mojo = ">=1.0.0"
-# Builds third_party/raylib into the environment.
-raylib-shim = { path = "third_party/raylib_mojo/shim" }
+# Builds shelf/raylib_mojo/shim into the environment.
+raylib-shim = { path = "shelf/raylib_mojo/shim" }
 
 [tasks]
-start = "mojo run -I third_party/raylib_mojo/src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib main.mojo"
+start = "mojo run -I shelf/raylib_mojo/src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib main.mojo"
 ```
+
+*(Note: If you added `raylib_mojo` as a Git submodule in `third_party/raylib_mojo`, use `third_party/raylib_mojo/shim` and `third_party/raylib_mojo/src` instead).*
 
 `libraylib.so` lives in the environment, so the linker needs `-L$CONDA_PREFIX/lib`.
 
@@ -126,13 +130,17 @@ Pixi builds raylib on first install, then launches your Mojo application.
 
 Examples demonstrating GPU acceleration combining MAX `DeviceContext` / `std.gpu` kernels with Raylib framebuffer rendering:
 
-| Mandelbrot & Julia Fractals (`pixi run gpu-mandelbrot`) | N-Body Galaxy Simulation (`pixi run gpu-nbody`) |
+| Mandelbrot & Julia Fractals (`pixi run example-gpu-mandelbrot`) | N-Body Galaxy Simulation (`pixi run example-gpu-nbody`) |
 | :---: | :---: |
 | ![Mandelbrot GPU Kernel](media/gpu_mandelbrot.png) | ![N-Body Galaxy GPU Kernel](media/gpu_nbody.gif) |
 
-| Real-Time Sphere Raytracer (`pixi run gpu-raytracer`) | Reaction-Diffusion PDE (`pixi run gpu-reaction-diffusion`) |
+| Real-Time Sphere Raytracer (`pixi run example-gpu-raytracer`) | Reaction-Diffusion PDE (`pixi run example-gpu-reaction-diffusion`) |
 | :---: | :---: |
 | ![Sphere Raytracer GPU Kernel](media/gpu_raytracer.png) | ![Reaction-Diffusion PDE GPU Kernel](media/gpu_reaction_diffusion.gif) |
+
+| 32k Waving Cubes GPU Kernel (`pixi run example-gpu-waving-cubes`) |
+| :---: |
+| ![32k Waving Cubes GPU Kernel](media/gpu_waving_cubes.gif) |
 
 ---
 
@@ -154,15 +162,18 @@ Run any of the included examples using Pixi tasks:
 | **Sprite Animation** | `pixi run example-sprite-anim` | 2D sprite sheet animation, frame clipping & speed control |
 | **Particle Assembly** | `pixi run example-particle-assembly` | Interactive 2D physics simulation with 1,200 particles & mouse forces |
 | **Game of Life** | `pixi run example-game-of-life` | Conway's Game of Life cellular automata simulation |
+| **Waving Cubes** | `pixi run example-waving-cubes` | 3D procedural cube wave simulation with HSV color palette |
+| **Mesh Generation** | `pixi run example-mesh-generation` | Procedural 3D mesh generation (plane, cube, sphere, torus, knot, poly) |
 
 ### Mojo GPU & Compute Kernel Examples
 
 | Example / Task | Command | Description |
 | :--- | :--- | :--- |
-| **Mandelbrot & Julia Fractals** | `pixi run gpu-mandelbrot` | Per-pixel parallel compute kernel calculating 480,000 complex iterations per frame with real-time zooming & panning |
-| **N-Body Gravity Galaxy** | `pixi run gpu-nbody` | $O(N^2)$ pairwise gravitational force summation kernel evaluating 2.5+ million star interaction vectors per frame |
-| **Real-Time Sphere Raytracer** | `pixi run gpu-raytracer` | Per-pixel ray casting, sphere intersection, specular lighting, and reflection bounce compute kernel (240,000+ rays/frame) |
-| **Reaction-Diffusion PDE** | `pixi run gpu-reaction-diffusion` | 2D Gray-Scott partial differential equation kernel with 9-point Laplacian stencil convolution for dynamic organic pattern growth |
+| **Mandelbrot & Julia Fractals** | `pixi run example-gpu-mandelbrot` | Per-pixel parallel compute kernel calculating 480,000 complex iterations per frame with real-time zooming & panning |
+| **N-Body Gravity Galaxy** | `pixi run example-gpu-nbody` | $O(N^2)$ pairwise gravitational force summation kernel evaluating 2.5+ million star interaction vectors per frame |
+| **Real-Time Sphere Raytracer** | `pixi run example-gpu-raytracer` | Per-pixel ray casting, sphere intersection, specular lighting, and reflection bounce compute kernel (240,000+ rays/frame) |
+| **Reaction-Diffusion PDE** | `pixi run example-gpu-reaction-diffusion` | 2D Gray-Scott partial differential equation kernel with 9-point Laplacian stencil convolution for dynamic organic pattern growth |
+| **32k Waving Cubes GPU** | `pixi run example-gpu-waving-cubes` | Evaluates 32k (32,768) parallel CUDA threads across 3D blocks computing wave dynamics, scatter vectors, scaling, and HSV colors |
 
 ---
 

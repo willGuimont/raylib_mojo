@@ -28,7 +28,10 @@ example-audio-stream = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xl
 example-sprite-anim = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/textures_sprite_animation.mojo" }
 example-particle-assembly = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/particle_assembly.mojo" }
 example-game-of-life = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/shaders_game_of_life.mojo" }
-gpu-mandelbrot = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/gpu_mandelbrot.mojo" }
-gpu-nbody = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/gpu_nbody.mojo" }
-gpu-raytracer = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/gpu_raytracer.mojo" }
-gpu-reaction-diffusion = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/gpu_reaction_diffusion.mojo" }
+example-gpu-mandelbrot = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/gpu_mandelbrot.mojo" }
+example-gpu-nbody = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/gpu_nbody.mojo" }
+example-gpu-raytracer = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/gpu_raytracer.mojo" }
+example-gpu-reaction-diffusion = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/gpu_reaction_diffusion.mojo" }
+example-gpu-waving-cubes = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/gpu_waving_cubes.mojo" }
+example-waving-cubes = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/models_waving_cubes.mojo" }
+example-mesh-generation = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/models_mesh_generation.mojo" }

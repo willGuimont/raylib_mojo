@@ -1,9 +1,12 @@
 from std.ffi import external_call, c_int, c_float, c_char
 from std.memory import Pointer
+from std.origin import ImmutAnyOrigin
 from raylib.types import (
     Vector2,
     Vector3,
     Vector4,
+    Quaternion,
+    Matrix,
     Color,
     Rectangle,
     Camera2D,

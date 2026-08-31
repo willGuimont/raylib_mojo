@@ -57,10 +57,6 @@ comptime TOTAL_CELLS = GRID_W * GRID_H
 comptime float_dtype = DType.float32
 comptime uint_dtype = DType.uint32
 
-# ===-----------------------------------------------------------------------===#
-# GPU Kernel Definition (Executed on GPU CUDA Threads)
-# ===-----------------------------------------------------------------------===#
-
 
 def reaction_diffusion_gpu_kernel(
     out_u: Pointer[Scalar[float_dtype], MutAnyOrigin],

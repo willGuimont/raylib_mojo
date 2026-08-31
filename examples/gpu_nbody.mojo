@@ -59,10 +59,6 @@ comptime BLOCKS_PER_GRID = (
 ) // THREADS_PER_BLOCK
 comptime dtype = DType.float32
 
-# ===-----------------------------------------------------------------------===#
-# GPU Kernel Definition (Executed on GPU CUDA Threads with Shared Memory Tiling)
-# ===-----------------------------------------------------------------------===#
-
 
 def nbody_gpu_kernel(
     out_px: Pointer[Scalar[dtype], MutAnyOrigin],

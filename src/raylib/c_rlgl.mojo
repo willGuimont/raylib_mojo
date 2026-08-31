@@ -1,9 +1,12 @@
 from std.ffi import external_call, c_int, c_float, c_char
 from std.memory import Pointer
+from std.origin import ImmutAnyOrigin
 from raylib.types import (
     Vector2,
     Vector3,
     Vector4,
+    Quaternion,
+    Matrix,
     Color,
     Rectangle,
     Camera2D,
@@ -424,10 +427,10 @@ def rlLoadExtensions(loader: Pointer[NoneType, origin=_]):
 
 def rlGetProcAddress(
     procName: Pointer[UInt8, origin=_]
-) -> Pointer[NoneType, origin=_]:
-    return external_call["rlGetProcAddress", Pointer[NoneType, origin=_]](
-        procName
-    )
+) -> Pointer[NoneType, origin=ImmutAnyOrigin]:
+    return external_call[
+        "rlGetProcAddress", Pointer[NoneType, origin=ImmutAnyOrigin]
+    ](procName)
 
 
 def rlGetVersion() -> Int32:
@@ -458,29 +461,29 @@ def rlGetShaderIdDefault() -> UInt32:
     return external_call["rlGetShaderIdDefault", UInt32]()
 
 
-def rlGetShaderLocsDefault() -> Pointer[Int32, origin=_]:
-    return external_call["rlGetShaderLocsDefault", Pointer[Int32, origin=_]]()
+def rlGetShaderLocsDefault() -> Pointer[Int32, origin=ImmutAnyOrigin]:
+    return external_call[
+        "rlGetShaderLocsDefault", Pointer[Int32, origin=ImmutAnyOrigin]
+    ]()
 
 
 def rlLoadRenderBatch(
     numBuffers: Int32, bufferElements: Int32
-) -> Pointer[NoneType, origin=_]:
-    return external_call["rlLoadRenderBatch", Pointer[NoneType, origin=_]](
-        numBuffers, bufferElements
-    )
+) -> Pointer[NoneType, origin=ImmutAnyOrigin]:
+    return external_call[
+        "rlLoadRenderBatch", Pointer[NoneType, origin=ImmutAnyOrigin]
+    ](numBuffers, bufferElements)
 
 
 def rlUnloadRenderBatch(batch: Pointer[NoneType, origin=_]):
     external_call["rlUnloadRenderBatch", NoneType](batch)
 
 
-def rlDrawRenderBatch(batch: Pointer[Pointer[NoneType, origin=_], origin=_]):
+def rlDrawRenderBatch(batch: Pointer[NoneType, origin=_]):
     external_call["rlDrawRenderBatch", NoneType](batch)
 
 
-def rlSetRenderBatchActive(
-    batch: Pointer[Pointer[NoneType, origin=_], origin=_]
-):
+def rlSetRenderBatchActive(batch: Pointer[NoneType, origin=_]):
     external_call["rlSetRenderBatchActive", NoneType](batch)
 
 
@@ -655,10 +658,12 @@ def rlGetGlTextureFormats(
     )
 
 
-def rlGetPixelFormatName(format: UInt32) -> Pointer[UInt8, origin=_]:
-    return external_call["rlGetPixelFormatName", Pointer[UInt8, origin=_]](
-        format
-    )
+def rlGetPixelFormatName(
+    format: UInt32,
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "rlGetPixelFormatName", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ](format)
 
 
 def rlUnloadTexture(id: UInt32):
@@ -679,16 +684,18 @@ def rlGenTextureMipmaps(
 
 def rlReadTexturePixels(
     id: UInt32, width: Int32, height: Int32, format: Int32
-) -> Pointer[NoneType, origin=_]:
-    return external_call["rlReadTexturePixels", Pointer[NoneType, origin=_]](
-        id, width, height, format
-    )
+) -> Pointer[NoneType, origin=ImmutAnyOrigin]:
+    return external_call[
+        "rlReadTexturePixels", Pointer[NoneType, origin=ImmutAnyOrigin]
+    ](id, width, height, format)
 
 
-def rlReadScreenPixels(width: Int32, height: Int32) -> Pointer[UInt8, origin=_]:
-    return external_call["rlReadScreenPixels", Pointer[UInt8, origin=_]](
-        width, height
-    )
+def rlReadScreenPixels(
+    width: Int32, height: Int32
+) -> Pointer[UInt8, origin=ImmutAnyOrigin]:
+    return external_call[
+        "rlReadScreenPixels", Pointer[UInt8, origin=ImmutAnyOrigin]
+    ](width, height)
 
 
 def rlLoadFramebuffer() -> UInt32:
