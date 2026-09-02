@@ -14,24 +14,25 @@ raylib-shim = { path = "shim" }
 
 [tasks]
 format = "mojo format ."
-test = "bash -c 'for test in tests/test_*.mojo; do echo Running $test...; mojo run -I src $test || exit 1; done'"
+test = "bash -c 'for test in tests/test_*.mojo; do echo Running $test...; mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib -Xlinker -lraygui $test || exit 1; done'"
 generate-bindings = "mojo run scripts/generate_bindings.mojo && pixi run format"
 build-bindings = { cmd = "pixi run generate-bindings" }
-build-examples = "bash -c 'for example in examples/*.mojo; do echo Building $example...; mojo build -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib -o /tmp/$(basename $example .mojo) $example || exit 1; done'"
-example-logo = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/raylib_mojo_logo.mojo" }
-example-window = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/basic_window.mojo" }
-example-bouncing-ball = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/bouncing_ball.mojo" }
-example-collision = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/shapes_collision_2d.mojo" }
-example-camera-2d = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/core_2d_camera.mojo" }
+build-examples = "bash -c 'for example in examples/*.mojo; do echo Building $example...; mojo build -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib -Xlinker -lraygui -o /tmp/$(basename $example .mojo) $example || exit 1; done'"
 example-3d = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/core_3d.mojo" }
 example-audio-stream = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/audio_raw_stream.mojo" }
-example-sprite-anim = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/textures_sprite_animation.mojo" }
-example-particle-assembly = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/particle_assembly.mojo" }
+example-bouncing-ball = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/bouncing_ball.mojo" }
+example-camera-2d = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/core_2d_camera.mojo" }
+example-collision = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/shapes_collision_2d.mojo" }
 example-game-of-life = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/shaders_game_of_life.mojo" }
 example-gpu-mandelbrot = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/gpu_mandelbrot.mojo" }
 example-gpu-nbody = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/gpu_nbody.mojo" }
 example-gpu-raytracer = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/gpu_raytracer.mojo" }
 example-gpu-reaction-diffusion = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/gpu_reaction_diffusion.mojo" }
 example-gpu-waving-cubes = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/gpu_waving_cubes.mojo" }
-example-waving-cubes = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/models_waving_cubes.mojo" }
+example-gui = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib -Xlinker -lraygui examples/simple_gui.mojo" }
+example-logo = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/raylib_mojo_logo.mojo" }
 example-mesh-generation = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/models_mesh_generation.mojo" }
+example-particle-assembly = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/particle_assembly.mojo" }
+example-sprite-anim = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/textures_sprite_animation.mojo" }
+example-waving-cubes = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/models_waving_cubes.mojo" }
+example-window = { cmd = "mojo run -I src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib examples/basic_window.mojo" }

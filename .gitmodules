@@ -1,3 +1,6 @@
 [submodule "third_party/raylib"]
 	path = third_party/raylib
 	url = https://github.com/raysan5/raylib
+[submodule "third_party/raygui"]
+	path = third_party/raygui
+	url = https://github.com/raysan5/raygui

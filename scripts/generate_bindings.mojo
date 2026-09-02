@@ -254,6 +254,7 @@ def generate_module_bindings(
     out_file.write(")\n\n")
 
     var verified_count = 0
+    var verified_funcs = List[String]()
     for decl_idx in range(len(full_decls)):
         var decl = String(full_decls[decl_idx])
         var paren_idx = decl.find("(")
@@ -276,6 +277,14 @@ def generate_module_bindings(
                 ret_c = String(ret_c.replace(" *", "*").strip())
 
                 if handle.check_symbol(func_name):
+                    var is_dup = False
+                    for vf in range(len(verified_funcs)):
+                        if verified_funcs[vf] == func_name:
+                            is_dup = True
+                            break
+                    if is_dup:
+                        continue
+                    verified_funcs.append(func_name)
                     verified_count += 1
                     var ret_mojo = map_c_type_to_mojo(ret_c)
                     ret_mojo = String(
@@ -317,20 +326,34 @@ def generate_module_bindings(
                                     + ": "
                                     + p_type_mojo
                                 )
-                                param_args = param_args + p_name_mojo
+                                if p_type_mojo == "Color":
+                                    param_args = (
+                                        param_args + p_name_mojo + ".to_u32()"
+                                    )
+                                else:
+                                    param_args = param_args + p_name_mojo
 
                     out_file.write("def " + func_name + "(" + param_defs + ")")
                     if ret_mojo != "NoneType":
                         out_file.write(" -> " + ret_mojo + ":\n")
-                        out_file.write(
-                            '    return external_call["'
-                            + func_name
-                            + '", '
-                            + ret_mojo
-                            + "]("
-                            + param_args
-                            + ")\n\n"
-                        )
+                        if ret_mojo == "Color":
+                            out_file.write(
+                                '    return Color.from_u32(external_call["'
+                                + func_name
+                                + '", UInt32]('
+                                + param_args
+                                + "))\n\n"
+                            )
+                        else:
+                            out_file.write(
+                                '    return external_call["'
+                                + func_name
+                                + '", '
+                                + ret_mojo
+                                + "]("
+                                + param_args
+                                + ")\n\n"
+                            )
                     else:
                         out_file.write(":\n")
                         out_file.write(
@@ -358,6 +381,16 @@ def raylib_shared_lib() -> String:
         if exists(installed):
             return installed
     return "build/raylib/raylib/libraylib.so"
+
+
+def raygui_shared_lib() -> String:
+    """Locates libraygui.so."""
+    var prefix = getenv("CONDA_PREFIX")
+    if prefix:
+        var installed = prefix + "/lib/libraygui.so"
+        if exists(installed):
+            return installed
+    return "build/libraygui.so"
 
 
 def main() raises:
@@ -393,4 +426,15 @@ def main() raises:
         "src/raylib/c_gestures.mojo",
         "",
     )
+
+    var gui_lib_path = raygui_shared_lib()
+    var gui_handle = OwnedDLHandle(gui_lib_path)
+    print("Loaded shared object libraygui.so.")
+    generate_module_bindings(
+        gui_handle,
+        "third_party/raygui/src/raygui.h",
+        "src/raylib/c_gui.mojo",
+        "RAYGUIAPI",
+    )
+
     print("All bindings generated successfully.")

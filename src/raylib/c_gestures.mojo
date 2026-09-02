@@ -70,35 +70,3 @@ def GetGesturePinchVector() -> Vector2:
 
 def GetGesturePinchAngle() -> Float32:
     return external_call["GetGesturePinchAngle", Float32]()
-
-
-def SetGesturesEnabled(flags: UInt32):
-    external_call["SetGesturesEnabled", NoneType](flags)
-
-
-def IsGestureDetected(gesture: UInt32) -> Bool:
-    return external_call["IsGestureDetected", Bool](gesture)
-
-
-def GetGestureDetected() -> Int32:
-    return external_call["GetGestureDetected", Int32]()
-
-
-def GetGestureHoldDuration() -> Float32:
-    return external_call["GetGestureHoldDuration", Float32]()
-
-
-def GetGestureDragVector() -> Vector2:
-    return external_call["GetGestureDragVector", Vector2]()
-
-
-def GetGestureDragAngle() -> Float32:
-    return external_call["GetGestureDragAngle", Float32]()
-
-
-def GetGesturePinchVector() -> Vector2:
-    return external_call["GetGesturePinchVector", Vector2]()
-
-
-def GetGesturePinchAngle() -> Float32:
-    return external_call["GetGesturePinchAngle", Float32]()

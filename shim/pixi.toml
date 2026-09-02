@@ -1,13 +1,13 @@
 [package]
 name = "raylib-shim"
 version = "0.1.0"
-description = "Builds the vendored raylib C library into the pixi environment as lib/libraylib.so"
+description = "Builds the vendored raylib and raygui C libraries into the pixi environment as lib/libraylib.so and lib/libraygui.so"
 
 [package.build]
 backend = { name = "pixi-build-cmake", version = "*" }
 
 [package.build.config]
-extra-input-globs = ["../third_party/raylib/**/*"]
+extra-input-globs = ["../third_party/raylib/**/*", "../third_party/raygui/**/*", "raygui_impl.c"]
 
 [package.build-dependencies]
 cmake = "*"

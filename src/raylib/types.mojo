@@ -1078,6 +1078,25 @@ struct Color(Equatable, ImplicitlyCopyable, TrivialRegisterPassable, Writable):
         self.a = a
 
     @always_inline
+    def to_u32(self) -> UInt32:
+        return (
+            UInt32(self.r)
+            | (UInt32(self.g) << 8)
+            | (UInt32(self.b) << 16)
+            | (UInt32(self.a) << 24)
+        )
+
+    @staticmethod
+    @always_inline
+    def from_u32(u: UInt32) -> Self:
+        return Self(
+            UInt8(u & 0xFF),
+            UInt8((u >> 8) & 0xFF),
+            UInt8((u >> 16) & 0xFF),
+            UInt8((u >> 24) & 0xFF),
+        )
+
+    @always_inline
     def __eq__(self, other: Self) -> Bool:
         return (
             self.r == other.r

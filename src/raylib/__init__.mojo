@@ -216,13 +216,84 @@ from raylib.models import (
     unload_automation_event_list,
 )
 
+from raylib.gui import (
+    Gui,
+    GuiCheckBox,
+    GuiSlider,
+    GuiSpinner,
+    GuiValueBox,
+    GuiToggleGroup,
+    GuiComboBox,
+    GuiDropdownBox,
+    GuiColorPicker,
+    gui_button,
+    gui_label,
+    gui_slider,
+    gui_check_box,
+    gui_window_box,
+    gui_group_box,
+    gui_panel,
+    gui_line,
+    gui_set_style,
+    gui_get_style,
+    gui_load_style,
+    gui_load_style_default,
+    gui_enable,
+    gui_disable,
+    gui_lock,
+    gui_unlock,
+    gui_is_locked,
+)
+
+from raylib.gui_enums import (
+    STATE_NORMAL,
+    STATE_FOCUSED,
+    STATE_PRESSED,
+    STATE_DISABLED,
+    TEXT_ALIGN_LEFT,
+    TEXT_ALIGN_CENTER,
+    TEXT_ALIGN_RIGHT,
+    DEFAULT,
+    LABEL,
+    BUTTON,
+    TOGGLE,
+    SLIDER,
+    PROGRESSBAR,
+    CHECKBOX,
+    COMBOBOX,
+    DROPDOWNBOX,
+    TEXTBOX,
+    VALUEBOX,
+    SPINNER,
+    LISTVIEW,
+    COLORPICKER,
+    SCROLLBAR,
+    STATUSBAR,
+    TEXT_SIZE,
+    TEXT_SPACING,
+    LINE_COLOR,
+    BACKGROUND_COLOR,
+    BORDER_COLOR_NORMAL,
+    SCROLLBAR_WIDTH,
+    ICON_PLAYER_PLAY,
+    ICON_PLAYER_PAUSE,
+    ICON_PLAYER_STOP,
+    ICON_EYE_ON,
+    ICON_EYE_OFF,
+    ICON_ARROW_DOWN_FILL,
+    ICON_ARROW_RIGHT_FILL,
+)
+
 import raylib.c as c
 import raylib.c_math as c_math
 import raylib.c_rlgl as c_rlgl
 import raylib.c_camera as c_camera
 import raylib.c_gestures as c_gestures
+import raylib.c_gui as c_gui
 import raylib.raymath as raymath
 import raylib.rlgl as rlgl
 import raylib.rcamera as rcamera
 import raylib.rgestures as rgestures
 import raylib.models as models
+import raylib.gui as gui
+import raylib.gui_enums as gui_enums

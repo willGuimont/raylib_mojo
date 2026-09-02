@@ -4,11 +4,12 @@
 
 [![CI](https://github.com/willGuimont/raylib_mojo/actions/workflows/ci.yml/badge.svg)](https://github.com/willGuimont/raylib_mojo/actions/workflows/ci.yml)
 [![raylib version](https://img.shields.io/badge/raylib-v6.0-dev)](https://github.com/raysan5/raylib)
+[![raygui version](https://img.shields.io/badge/raygui-v5.0-dev)](https://github.com/raysan5/raygui)
 [![mojo version](https://img.shields.io/badge/mojo-v1.0-orange.svg)](https://mojolang.org)
 [![pixi](https://img.shields.io/badge/pixi-package_manager-purple.svg)](https://pixi.sh)
 [![license](https://img.shields.io/badge/license-zlib-green.svg)](LICENSE)
 
-**Mojo bindings for [raylib](https://www.raylib.com/)**, a simple and easy-to-use library to enjoy videogames programming.
+**Mojo bindings for [raylib](https://www.raylib.com/)** and **[raygui](https://github.com/raysan5/raygui)**, a simple and easy-to-use library to enjoy videogames and GUI programming.
 
 ## Quick Example
 
@@ -18,20 +19,30 @@ from raylib import (
     begin_drawing, end_drawing, clear_background, draw_text, draw_fps,
     RAYWHITE, DARKGRAY, LIGHTGRAY, MAROON
 )
+from raylib.gui import Gui, GuiCheckBox, GuiSlider, Rectangle
 
 def main():
     # Initialize window
-    init_window(800, 450, "raylib [core] example - basic window")
+    init_window(800, 450, "raylib + raygui [core] example")
     set_target_fps(60)
+
+    var chk = GuiCheckBox(Rectangle(30, 80, 20, 20), "Enable Feature", True)
+    var slider = GuiSlider(Rectangle(30, 120, 150, 20), "Speed", "100%", 0.5, 0.0, 1.0)
 
     # Main game loop
     while not window_should_close():
         begin_drawing()
         clear_background(RAYWHITE())
 
-        draw_text("Congrats! You created your first raylib + mojo window!", 120, 200, 20, DARKGRAY())
-        draw_fps(10, 10)
+        draw_text("Congrats! You created your first raylib + raygui mojo window!", 120, 30, 20, DARKGRAY())
+        
+        # Draw raygui controls
+        _ = chk.draw()
+        _ = slider.draw()
+        if Gui.button(Rectangle(30, 160, 150, 30), "Click Me"):
+            print("Button clicked!")
 
+        draw_fps(10, 10)
         end_drawing()
 
     # De-initialization
@@ -57,11 +68,11 @@ Clone the repository with submodules and install the environment:
 git clone --recursive https://github.com/willGuimont/raylib_mojo.git
 cd raylib_mojo
 
-# Builds the vendored raylib into the environment
+# Builds the vendored raylib and raygui into the environment
 pixi install
 ```
 
-`pixi install` compiles `third_party/raylib` through the [`shim/`](shim) package and installs `libraylib.so` into the environment.
+`pixi install` compiles `third_party/raylib` and `third_party/raygui` through the [`shim/`](shim) package and installs `libraylib.so` and `libraygui.so` into the environment.
 
 ---
 
@@ -77,7 +88,7 @@ With the [shelf](https://mojoshelf.org/getting-started) extension, which vendors
 ```bash
 pixi global install --channel https://mojoshelf.org/channel mojoshelf
 shelf add raylib_mojo
-git submodule update --init --recursive   # required to pull raylib itself as a submodule
+git submodule update --init --recursive   # required to pull raylib and raygui submodules
 ```
 
 Or as a plain git submodule:
@@ -89,8 +100,8 @@ git submodule update --init --recursive
 
 ### 2. Configure `pixi.toml` / `mojoproject.toml`
 
-Depend on the `shim` package that ships with `raylib_mojo`. Pixi builds raylib
-and installs `libraylib.so` into your environment.
+Depend on the `shim` package that ships with `raylib_mojo`. Pixi builds raylib and raygui,
+and installs `libraylib.so` and `libraygui.so` into your environment.
 
 When added via `shelf add` (which places tins in `shelf/raylib_mojo/`):
 
@@ -109,12 +120,12 @@ mojo = ">=1.0.0"
 raylib-shim = { path = "shelf/raylib_mojo/shim" }
 
 [tasks]
-start = "mojo run -I shelf/raylib_mojo/src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib main.mojo"
+start = "mojo run -I shelf/raylib_mojo/src -Xlinker -L$CONDA_PREFIX/lib -Xlinker -lraylib -Xlinker -lraygui main.mojo"
 ```
 
 *(Note: If you added `raylib_mojo` as a Git submodule in `third_party/raylib_mojo`, use `third_party/raylib_mojo/shim` and `third_party/raylib_mojo/src` instead).*
 
-`libraylib.so` lives in the environment, so the linker needs `-L$CONDA_PREFIX/lib`.
+`libraylib.so` and `libraygui.so` live in the environment, so the linker needs `-L$CONDA_PREFIX/lib -lraylib -lraygui`.
 
 ### 3. Build & Run Your Project
 
@@ -122,7 +133,7 @@ start = "mojo run -I shelf/raylib_mojo/src -Xlinker -L$CONDA_PREFIX/lib -Xlinker
 pixi run start
 ```
 
-Pixi builds raylib on first install, then launches your Mojo application.
+Pixi builds raylib and raygui on first install, then launches your Mojo application.
 
 ---
 
@@ -152,6 +163,7 @@ Run any of the included examples using Pixi tasks:
 
 | Example / Task | Command | Description |
 | :--- | :--- | :--- |
+| **Simple GUI Controls** | `pixi run example-gui` | Clean Raygui controls demo showcasing interactive checkboxes, sliders, spinners, toggle groups, dropdowns, buttons, and visual canvas rendering |
 | **Logo Generator** | `pixi run example-logo` | Generates the official raylib-mojo brand logo |
 | **Basic Window** | `pixi run example-window` | Basic window creation and text rendering |
 | **Bouncing Ball** | `pixi run example-bouncing-ball` | 2D physics and vector movement simulation |
@@ -181,12 +193,12 @@ Run any of the included examples using Pixi tasks:
 
 ### Automatic Binding Generation
 
-`raylib_mojo` includes a pure Mojo automatic binding generator script ([scripts/generate_bindings.mojo](scripts/generate_bindings.mojo)) that parses Raylib's C declarations from `raylib.h`, `raymath.h`, `rlgl.h`, `rcamera.h`, and `rgestures.h`, maps C types to Mojo types, and verifies each symbol dynamically against `libraylib.so`.
+`raylib_mojo` includes a pure Mojo automatic binding generator script ([scripts/generate_bindings.mojo](scripts/generate_bindings.mojo)) that parses C declarations from `raylib.h`, `raymath.h`, `rlgl.h`, `rcamera.h`, `rgestures.h`, and `raygui.h`, maps C types to Mojo types, and verifies each symbol dynamically against `libraylib.so` and `libraygui.so`.
 
 To regenerate the bindings:
 
 ```bash
-# Regenerates bindings into src/raylib/ against the environment's libraylib.so
+# Regenerates bindings into src/raylib/ against environment libraries
 pixi run generate-bindings
 ```
 
